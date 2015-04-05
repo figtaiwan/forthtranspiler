@@ -69,6 +69,9 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	var	_i=function _i() { /// - ( -- i )
 		codegen.push("stack.push(_i"+rDepth+");");
 	}
+	var	_j=function _j() { /// - ( -- i )
+		codegen.push("stack.push(_i"+(rDepth-1)+");");
+	}
 
 	//////////////////////////////////////////////////////////////////////////
 	/// constructing words for opCodes
@@ -176,10 +179,11 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	, ":"		: {xt:_colon	,defining:1} /// :		<name>	( -- )
 	, "value"	: {xt:_value	,defining:1} /// value	<name>	( n -- )
 	, "to"		: {xt:_to		,defining:1} /// to		<name>	( n -- ) /// sam 21050405
-	, "do"		: {xt:_do		,defining:0} /// do				( lmt bgn -- ) /// sam 21050405
-	, "loop"	: {xt:_loop		,defining:0} /// loop			( -- ) /// sam 21050405
-	, "+loop"	: {xt:_plusLoop	,defining:0} /// +loop			( n -- ) /// sam 21050405
-	, "i"		: {xt:_i		,defining:0} /// i				( -- i ) /// sam 21050405
+	, "do"		: {xt:_do		,defining:0} /// do				( lmt bgn -- ) /// sam 21050406
+	, "loop"	: {xt:_loop		,defining:0} /// loop			( -- ) /// sam 21050406
+	, "+loop"	: {xt:_plusLoop	,defining:0} /// +loop			( n -- ) /// sam 21050406
+	, "i"		: {xt:_i		,defining:0} /// i				( -- i ) /// sam 21050406
+	, "j"		: {xt:_j		,defining:0} /// j				( -- j ) /// sam 21050406
 	}
 	
 	//////////////////////////////////////////////////////////////////////////
