@@ -70,15 +70,33 @@ describe(			"B.  test core words"
 describe(			"C.  test defining words"
 	,function(){		/////////////////////////
 
-	it(				"C1.  test value ok"
+	it(				"C1.  test value to ok"
 	,function(){ assert.deepEqual(	////////////////////
-		transpile([		"5 value a 3 a +"
-		]).stack,		[8]
+		transpile([		"5 value a 3 a + to a 2 a +"
+		]).stack,		[10]
 	)})
-
+			
 	it(				"C2.  test : ; ok"
 	,function(){ assert.deepEqual(	//////////////////
 		transpile([		": x 5 + ; 3 x"
 		]).stack,		[8]
+	)})
+
+	it(				"C3.  test do i loop ok"
+	,function(){ assert.deepEqual(	//////////////////
+		transpile([		"0 10 1 do i + loop"
+		]).stack,		[45]
+	)})
+
+	it(				"C4.  another way to test do i loop ok"
+	,function(){ assert.deepEqual(	//////////////////
+		transpile([		"0 1 10 do i + loop"
+		]).stack,		[55]
+	)})
+
+	it(				"C4.  test do i +loop ok"
+	,function(){ assert.deepEqual(	//////////////////
+		transpile([		"0 10 1 do i + 2 +loop"
+		]).stack,		[25]
 	)})
 });
