@@ -1,2 +1,2 @@
-var stack=[];
-var runtime={stack:stack};
+var stack=[], rStack=[], _out='';
+var runtime={stack:stack,out:_out};

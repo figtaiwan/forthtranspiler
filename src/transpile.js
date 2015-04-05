@@ -36,10 +36,38 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		codegen.push("var tos=stack.pop();stack.push(stack.pop()+tos);");
 	}
 	var _dot=function _dot() { /// . ( n -- )
-		codegen.push("console.log(stack.pop());");
+		codegen.push("_out+=' '+stack.pop();");
+	}
+	var _dotr=function _dotr() { /// .r ( n m -- ) /// print n right-justified with m-digits
+		codegen.push("var m=stack.pop(),n=stack.pop().toString();while(n.length<m)n=' '+n;_out+=n;");
+	}
+	var _cr=function _cr() { /// . ( -- )
+		codegen.push("_out+='\\n';");
 	}
 	var _minus=function _minus() { /// - ( a b -- a-b )
 		codegen.push("var tos=stack.pop();stack.push(stack.pop()-tos);");
+	}
+	var rDepth=-1;
+	var _do=function _do() { /// do ( lmt bgn -- )
+		rDepth++;
+		codegen.push(
+			"var _B"+rDepth+"=stack.pop(),"+
+			    "_L"+rDepth+"=stack.pop(),"+
+			    "_R=_L"+rDepth+"-_B"+rDepth+",\n\t\t"+
+				"_D"+rDepth+"=_R/Math.abs(_R);"+
+				"_L"+rDepth+"-=(1-_D"+rDepth+")/2;\n\t\t"+
+			"for(var _i"+rDepth+"=_B"+rDepth+";"+
+				"(_L"+rDepth+"-_i"+rDepth+")*_D"+rDepth+">0;"+
+				"_i"+rDepth+"+=_D"+rDepth+"){");
+	}
+	var _loop=function _loop() { /// loop ( -- )
+		codegen.push("}"),rDepth--;
+	}
+	var _plusLoop=function _plusLoop() { /// +loop ( n -- )
+		codegen.push("_i"+rDepth+"+=stack.pop()-_D"+rDepth+";\n\t\t}"),rDepth--;
+	}
+	var	_i=function _i() { /// - ( -- i )
+		codegen.push("stack.push(_i"+rDepth+");");
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -85,19 +113,6 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	var _runColon=function _runColon(name){ /// <name> ( ... )
 		codegen.push(name+"();");
 	}
-	var _setDo=function _setDo(){ /// do ( lmt bgn -- )
-		codegen.push("var _B=stack.pop(),_L=stack.pop(),_R=_L-_B,_D=_R/Math.abs(_R);\n\t\t_L-=(1-_D)/2;"+
-		"for(var _i=_B;(_L-_i)*_D>0;_i+=_D){");
-	}
-	var _setLoop=function _setLoop(){ /// loop ( -- )
-		codegen.push("}");
-	}
-	var _setPlusLoop=function _setPlusLoop(){ /// +loop ( n -- )
-		codegen.push("_i+=stack.pop()-_D;\n\t\t}");
-	}
-	var _setI=function _setI(){ /// i ( -- i )
-		codegen.push("stack.push(_i);");
-	}
 	//////////////////////////////////////////////////////////////////////////
 	/// defining words
 	//////////////////////////////////////////////////////////////////////////
@@ -109,7 +124,7 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 			eval('xt=function(){_setValue("'+newName+'")}');
 			if(tracing) showOpInfo('_setValue("'+newName+'")');
 			opCodes.push( xt ); // we define newName to setValue
-			addMapping('value '+newName), jsline++;
+			addMapping(cmd), jsline++;
 			eval('xt=function(){_getValue("'+newName+'")}');
 			defined[newName]=xt; // then use newName to getValue
 		//	console.log('defined['+newName+']:'+xt)
@@ -130,7 +145,7 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 			eval('xt=function(){_setColon("'+newName+'")}');
 			if(tracing) showOpInfo('_setColon("'+newName+'")');
 			opCodes.push( xt ); // setColon to begin colon defintion
-			addMapping(': '+newName), jsline++;
+			addMapping(cmd), jsline++;
 		} else
 			throw 'need newName for ":" at line '+iLin+' column '+iCol[iTok];
 	}
@@ -141,30 +156,6 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		addMapping(token), jsline++;
 		eval('newXt=function(){_runColon("'+newName+'")}');
 		defined[newName]=newXt; // then use newName to runColon
-	}
-	var _do=function _do(){ /// do ( lmt bgn -- )
-		eval('xt=function(){_setDo()}');
-		if(tracing) showOpInfo('_setDo()');
-		opCodes.push( xt ); // setDo for range of index i
-		addMapping(token), jsline++;
-	}
-	var _loop=function _loop(){ /// loop ( -- )
-		eval('xt=function(){_setLoop()}');
-		if(tracing) showOpInfo('_setLoop()');
-		opCodes.push( xt ); // setDo for range of index i
-		addMapping(token), jsline++;
-	}
-	var _plusloop=function _plusloop(){ /// +loop ( n -- )
-		eval('xt=function(){_setPlusLoop()}');
-		if(tracing) showOpInfo('_setPlusLoop()');
-		opCodes.push( xt ); // setDo for range of index i
-		addMapping(token), jsline++;
-	}
-	var _i=function _i(){ /// loop ( -- )
-		eval('xt=function(){_setI()}');
-		if(tracing) showOpInfo('_setI()');
-		opCodes.push( xt ); // setDo for range of index i
-		addMapping(token), jsline++;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	/// name list
@@ -178,15 +169,17 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	, "*"		: {xt:_multiply	,defining:0} /// *				( a b -- a*b )
 	, "+"		: {xt:_plus		,defining:0} /// +				( a b -- a+b )
 	, "."	 	: {xt:_dot		,defining:0} /// .				( n -- )
+	, ".r"	 	: {xt:_dotr		,defining:0} /// .r				( n m -- )
+	, "cr"	 	: {xt:_cr		,defining:0} /// cr				( -- )
 	, "-"		: {xt:_minus	,defining:0} /// -				( a b -- a-b )
 	, ";"		: {xt:_semicolon,defining:1} /// ;				( -- )
 	, ":"		: {xt:_colon	,defining:1} /// :		<name>	( -- )
 	, "value"	: {xt:_value	,defining:1} /// value	<name>	( n -- )
 	, "to"		: {xt:_to		,defining:1} /// to		<name>	( n -- ) /// sam 21050405
-	, "do"		: {xt:_do		,defining:1} /// do				( lmt bgn -- ) /// sam 21050405
-	, "loop"	: {xt:_loop		,defining:1} /// loop			( -- ) /// sam 21050405
-	, "+loop"	: {xt:_plusloop	,defining:1} /// +loop			( n -- ) /// sam 21050405
-	, "i"		: {xt:_i		,defining:1} /// i				( -- i ) /// sam 21050405
+	, "do"		: {xt:_do		,defining:0} /// do				( lmt bgn -- ) /// sam 21050405
+	, "loop"	: {xt:_loop		,defining:0} /// loop			( -- ) /// sam 21050405
+	, "+loop"	: {xt:_plusLoop	,defining:0} /// +loop			( n -- ) /// sam 21050405
+	, "i"		: {xt:_i		,defining:0} /// i				( -- i ) /// sam 21050405
 	}
 	
 	//////////////////////////////////////////////////////////////////////////
@@ -245,7 +238,6 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 			iTok=0;
 			line.replace(/\S+/g,function(token,j){ iCol[iTok++]=j; }); // iCol for each token
 			iTok=0,tokens=line.split(/\s+/);
-			cmd='';
 			while(checkNextToken()!==undefined){
 				forthncol=iCol[iTok]+1;
 				cmd=token=nextToken();
@@ -317,6 +309,7 @@ var transpile=function(forth) {
 	var code =	"(function(){"				+"\n"
 			 +	runtimecode					+"\n"
 			 +	trans.jsCodes.join("\n")	+"\n"
+			 +	"runtime.out=_out;"			+"\n"
 			 +	"return runtime;"			+"\n"
 			 +	"})()";
 	var indent='\t';
@@ -331,9 +324,11 @@ var transpile=function(forth) {
 		return adjust;
 	}).join('\n');
 	if(tracing) console.log('jsCode:\n'+jsCode)
+	if(tracing) console.log('code:\n'+code)
 	try {
 		var res=eval(code);
 		if(tracing) console.log('\nresult stack: '+JSON.stringify(res.stack)+'\n');
+		if(res.out) console.log('out: '+res.out);
 	}
 	catch(e) { console.log(e) }
 	return res;
