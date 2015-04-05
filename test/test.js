@@ -82,21 +82,28 @@ describe(			"C.  test defining words"
 		]).stack,		[8]
 	)})
 
-	it(				"C3.  test do i loop ok"
+	it(				"C3.  test do loop ok"
 	,function(){ assert.deepEqual(	//////////////////
-		transpile([		"0 10 1 do i + loop"
+		transpile([		"0 10 1 do i + loop" // sum( 1, 2, ,,, 8, 9 )
 		]).stack,		[45]
 	)})
 
-	it(				"C4.  another way to test do i loop ok"
+	it(				"C4.  another way to test do loop ok"
 	,function(){ assert.deepEqual(	//////////////////
-		transpile([		"0 1 10 do i + loop"
-		]).stack,		[55]
+		transpile([		"0 1 9 do i + loop" // sum( 9, 8, ... 2, 1 )
+		]).stack,		[45]
 	)})
 
-	it(				"C4.  test do i +loop ok"
+	it(				"C5.  test do +loop ok"
 	,function(){ assert.deepEqual(	//////////////////
-		transpile([		"0 10 1 do i + 2 +loop"
+		transpile([		"0 1 9 do i + -1 +loop" // sum( 9, 8, ... 2, 1 )
+		]).stack,		[45]
+	)})
+
+	it(				"C6.  another way test do i +loop ok"
+	,function(){ assert.deepEqual(	//////////////////
+		transpile([		"0 10 1 do i + 2 +loop" // sum( 1, 3, 5, 7, 9 )
 		]).stack,		[25]
 	)})
+			
 });

@@ -86,16 +86,17 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		codegen.push(name+"();");
 	}
 	var _setDo=function _setDo(){ /// do ( lmt bgn -- )
-		codegen.push("var bgn=stack.pop(), lmt=stack.pop(); for(var i=bgn; i<lmt; i++){");
+		codegen.push("var _B=stack.pop(),_L=stack.pop(),_R=_L-_B,_D=_R/Math.abs(_R);\n\t\t_L-=(1-_D)/2;"+
+		"for(var _i=_B;(_L-_i)*_D>0;_i+=_D){");
 	}
 	var _setLoop=function _setLoop(){ /// loop ( -- )
 		codegen.push("}");
 	}
 	var _setPlusLoop=function _setPlusLoop(){ /// +loop ( n -- )
-		codegen.push("i+=stack.pop()-1; }");
+		codegen.push("_i+=stack.pop()-_D;\n\t\t}");
 	}
 	var _setI=function _setI(){ /// i ( -- i )
-		codegen.push("stack.push(i);");
+		codegen.push("stack.push(_i);");
 	}
 	//////////////////////////////////////////////////////////////////////////
 	/// defining words
