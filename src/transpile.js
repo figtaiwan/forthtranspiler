@@ -99,7 +99,7 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		} else
 			throw 'need newName for "value" at line '+iLin+' column '+iCol[iTok];
 	}
-	var colon=function colon(){ /// : ( <name> -- )
+	var colon=function colon(){ /// : <name> ( -- )
 		newName=nextToken();
 		if(newName) {
 			cmd+=' '+newName;
