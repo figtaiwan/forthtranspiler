@@ -4,8 +4,8 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 //  runtime: 
 //  inputfn: input file name
 // outputfn: output file name
-	var lines=forthCodes, tokens=[], opCodes=[], defined={}, iCol={};
-	var iLin=0, iCol=0, iTok=0, iOpCode=0;
+	var lines=forthCodes, tokens=[], opCodes=[], defined={}, iCol=[];
+	var iLin=0, iTok=0, iOpCode=0;
 	var line='', token, opCode;
 	if(typeof(lines)=='string') lines=forthCodes.split(/\r?\n/);
 
@@ -83,7 +83,7 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 			defined[newName]=xt; // then use newName to getValue
 		//	console.log('defined['+newName+']:'+xt)
 		} else
-			throw 'need newName for "value" at line '+iLin+' column '+iCol;
+			throw 'need newName for "value" at line '+iLin+' column '+iCol[iTok];
 	}
 	var colon=function(){ /// : ( <name> -- )
 		newName=nextToken();
@@ -94,7 +94,7 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 			opCodes.push( xt ); // setColon to begin colon defintion
 			addMapping(': '+newName), jsline++;
 		} else
-			throw 'need newName for ":" at line '+iLin+' column '+iCol;
+			throw 'need newName for ":" at line '+iLin+' column '+iCol[iTok];
 	}
 	var semic=function(){ /// ; ( -- )
 		var xt;
