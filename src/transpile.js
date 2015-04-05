@@ -21,13 +21,13 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		codegen.push("stack.pop();");
 	}
 	var swap=function swap() { /// swap ( a b -- b a ) // 20150405 sam
-		codegen.push("var n=statck.length-2, a=stack[n]; stack[n++]=stack[n], stack[n]=a;");
+		codegen.push("var n=stack.length-2, a=stack[n]; stack[n++]=stack[n], stack[n]=a;");
 	}
 	var rot=function rot() { /// rot ( a b c-- b c a ) // 20150405 sam
-		codegen.push("var n=statck.length-3, a=stack[n]; stack[n++]=stack[n], stack[n++]=stack[n], stack[n]=a;");
+		codegen.push("var n=stack.length-3, a=stack[n]; stack[n++]=stack[n], stack[n++]=stack[n], stack[n]=a;");
 	}
 	var dashrot=function dashrot() { /// -rot ( a b c-- c a b ) // 20150405 sam
-		codegen.push("var n=statck.length-1, c=stack[n]; stack[n--]=stack[n], stack[n--]=stack[n], stack[n]=c;");
+		codegen.push("var n=stack.length-1, c=stack[n]; stack[n--]=stack[n], stack[n--]=stack[n], stack[n]=c;");
 	}
 	var multiply=function multiply() { /// * ( a b -- a*b )
 		codegen.push("stack.push(stack.pop()*stack.pop());");

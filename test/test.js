@@ -62,7 +62,7 @@ describe(			"B.  test core words"
 	it(				"B6.  test rot -rot ok"
 	,function(){ assert.deepEqual(	////////////////////
 		transpile([		"1 2 3 rot swap -rot"
-		]).stack,		[3 2 1]
+		]).stack,		[3,2,1]
 	)})
 
 });
