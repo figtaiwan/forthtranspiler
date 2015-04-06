@@ -2,7 +2,7 @@ var assert		=require("assert");
 var Transpile	=require("../src/transpile.js");
 var transpile	=Transpile.transpile;
 
-Transpile.trace(2);
+Transpile.trace(0);
 // /*
 describe(			"A.  test literals"
 	,function(){		///////////////////
@@ -164,6 +164,13 @@ describe(			"D.  nested colon calls"
 						"  7 14 21 28 35 42 49 56 63\n"+
 						"  8 16 24 32 40 48 56 64 72\n"+
 						"  9 18 27 36 45 54 63 72 81"
+	)})
+
+	it(				"D3.  looping 200000000 times"
+	,function(){ assert.deepEqual(	////////////////////
+		transpile([		": x 200000000 0 do loop ;" // \ print out a*b
+				  ,		"x"
+		]).stack, []
 	)})
 
 });

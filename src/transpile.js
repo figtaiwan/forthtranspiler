@@ -235,7 +235,7 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		});
 	}
 	var showOpInfo=function(msg){
-		console.log('\t'+at+' '+JSON.stringify(cmd)+(msg?'\n\t\t\topCode '+opCodes.length+': '+msg:''));
+		if(tracing) console.log('\t'+at+' '+JSON.stringify(cmd)+(msg?'\n\t\t\topCode '+opCodes.length+': '+msg:''));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
