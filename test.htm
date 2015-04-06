@@ -1,0 +1,37 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link rel="stylesheet" type="text/css" href="test.css">
+<script src='jefvm.v3.js'    ></script>
+<script src='jefvm.v3_ext.js'></script>
+<script>
+function init(){
+	eval(tool.value);
+}
+function clicked(){
+	var old=msgJs.style.backgroundColor;
+	msgJs.style.backgroundColor = '#FF8';
+	setTimeout(function(){
+		eval(js.value);
+		msgJs.style.backgroundColor = old;
+	},0);
+}
+</script>
+<body onload='init()'>
+<textarea id='tool'>
+window.jefTime=function(jefCode){
+  var t=new Date().getTime(); vm.exec(jefCode);
+  t=new Date().getTime()-t;
+  msgJs.innerText+='\nrun jef code "'+jefCode+'" needs '+t+' ms';
+}
+window.jsTime=function(jsCode){
+  var t=new Date().getTime(); eval(jsCode);
+  t=new Date().getTime()-t;
+  msgJs.innerText+='\nrun js  code "'+jsCode+'" needs '+t+' ms';
+}
+</textarea><br>
+<button id='btnRunJs' onClick='clicked()'>run the following js code</button><br>
+<textarea id="js">
+jefTime(    '2000000 for next');
+jefTime(': x 2000000 for next ; x');
+jsTime ('_i= 2000000; while(_i--){}');</textarea>
+<pre id='msgJs'>after the js code running, please wait until done</pre>
+</body>
