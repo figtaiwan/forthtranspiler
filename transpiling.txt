@@ -3,20 +3,17 @@
 
   A.  test literals
 
-forthCode: "0 1 23 -4 56789"
-
 transpiling:
-        line 0: "0 1 23 -4 56789"
-        col 00 token 0: "0"
-                                opCode 0: 0
-        col 02 token 1: "1"
-                                opCode 1: 1
-        col 04 token 2: "23"
-                                opCode 2: 23
-        col 07 token 3: "-4"
-                                opCode 3: -4
-        col 10 token 4: "56789"
-                                opCode 4: 56789
+        line 0 "0 1 23 -4 56789"
+          at 0 "0"
+          at 2 "1"
+                        opCode 1: 1
+          at 4 "23"
+                        opCode 2: 23
+          at 7 "-4"
+                        opCode 3: -4
+          at 10 "56789"
+                        opCode 4: 56789
 jsCode:
         0       stack.push(0);
         1       stack.push(1);
@@ -28,16 +25,14 @@ result stack: [0,1,23,-4,56789]
 
     √ A1.  test integers ok
 
-forthCode: "0.1 -2.3 -4.5e6"
-
 transpiling:
-        line 0: "0.1 -2.3 -4.5e6"
-        col 00 token 0: "0.1"
-                                opCode 0: 0.1
-        col 04 token 1: "-2.3"
-                                opCode 1: -2.3
-        col 09 token 2: "-4.5e6"
-                                opCode 2: -4500000
+        line 0 "0.1 -2.3 -4.5e6"
+          at 0 "0.1"
+                        opCode 0: 0.1
+          at 4 "-2.3"
+                        opCode 1: -2.3
+          at 9 "-4.5e6"
+                        opCode 2: -4500000
 jsCode:
         0       stack.push(0.1);
         1       stack.push(-2.3);
@@ -47,16 +42,14 @@ result stack: [0.1,-2.3,-4500000]
 
     √ A2.  test floats ok
 
-forthCode: "'0.1' 'abc' 'deFghi'"
-
 transpiling:
-        line 0: "'0.1' 'abc' 'deFghi'"
-        col 00 token 0: "'0.1'"
-                                opCode 0: "0.1"
-        col 06 token 1: "'abc'"
-                                opCode 1: "abc"
-        col 12 token 2: "'deFghi'"
-                                opCode 2: "deFghi"
+        line 0 "'0.1' 'abc' 'deFghi'"
+          at 0 "'0.1'"
+                        opCode 0: "0.1"
+          at 6 "'abc'"
+                        opCode 1: "abc"
+          at 12 "'deFghi'"
+                        opCode 2: "deFghi"
 jsCode:
         0       stack.push("0.1");
         1       stack.push("abc");
@@ -66,75 +59,65 @@ result stack: ["0.1","abc","deFghi"]
 
     √ A3.  test strings ok
 
+
   B.  test core words
 
-forthCode: "3 5 +"
-
 transpiling:
-        line 0: "3 5 +"
-        col 00 token 0: "3"
-                                opCode 0: 3
-        col 02 token 1: "5"
-                                opCode 1: 5
-        col 04 token 2: "+"
-                                opCode 2: plus()
+        line 0 "3 5 +"
+          at 0 "3"
+                        opCode 0: 3
+          at 2 "5"
+                        opCode 1: 5
+          at 4 "+"
+                        opCode 2: _plus()
 jsCode:
         0       stack.push(3);
-        1       stack.push(5);
-        2       var tos=stack.pop();stack.push(stack.pop()+tos);
+        1       stack[stack.length-1]+=5;
 
 result stack: [8]
 
     √ B1.  test + numbers ok
 
-forthCode: "5 3 -"
-
 transpiling:
-        line 0: "5 3 -"
-        col 00 token 0: "5"
-                                opCode 0: 5
-        col 02 token 1: "3"
-                                opCode 1: 3
-        col 04 token 2: "-"
-                                opCode 2: minus()
+        line 0 "5 3 -"
+          at 0 "5"
+                        opCode 0: 5
+          at 2 "3"
+                        opCode 1: 3
+          at 4 "-"
+                        opCode 2: _minus()
 jsCode:
         0       stack.push(5);
-        1       stack.push(3);
-        2       var tos=stack.pop();stack.push(stack.pop()-tos);
+        1       stack[stack.length-1]-=3;
 
 result stack: [2]
 
     √ B2.  test - numbers ok
 
-forthCode: "'3' 5 +"
-
 transpiling:
-        line 0: "'3' 5 +"
-        col 00 token 0: "'3'"
-                                opCode 0: "3"
-        col 04 token 1: "5"
-                                opCode 1: 5
-        col 06 token 2: "+"
-                                opCode 2: plus()
+        line 0 "'3' 5 +"
+          at 0 "'3'"
+                        opCode 0: "3"
+          at 4 "5"
+                        opCode 1: 5
+          at 6 "+"
+                        opCode 2: _plus()
 jsCode:
         0       stack.push("3");
-        1       stack.push(5);
-        2       var tos=stack.pop();stack.push(stack.pop()+tos);
+        1       stack[stack.length-1]+=5;
 
 result stack: ["35"]
 
     √ B3.  test + strings ok
 
-forthCode: "3.5 dup *"
-
 transpiling:
-        line 0: "3.5 dup *"
-        col 00 token 0: "3.5"
-                                opCode 0: 3.5
-        col 04 token 1: "dup"
-                                opCode 1: dup()
-        col 08 token 2: "*"
-                                opCode 2: multiply()
+        line 0 "3.5 dup *"
+          at 0 "3.5"
+                        opCode 0: 3.5
+          at 4 "dup"
+                        opCode 1: _dup()
+          at 8 "*"
+                        opCode 2: _multiply()
 jsCode:
         0       stack.push(3.5);
         1       stack.push(3.5);
@@ -144,62 +127,515 @@ result stack: [12.25]
 
     √ B4.  test dup * ok
 
-  C.  test defining words
+transpiling:
+        line 0 "3 5 swap drop"
+          at 0 "3"
+                        opCode 0: 3
+          at 2 "5"
+                        opCode 1: 5
+          at 4 "swap"
+                        opCode 2: _swap()
+          at 9 "drop"
+                        opCode 3: _drop()
+jsCode:
+        0       stack.push(3);
+        1       stack.push(5);
+        2       var n=stack.length-2, a=stack[n];
+		stack[n++]=stack[n], stack[n]=a;
+        3       stack.pop();
 
-forthCode: "5 value a 3 a +"
+result stack: [5]
+
+    √ B5.  test swap drop ok
 
 transpiling:
-        line 0: "5 value a 3 a +"
-        col 00 token 0: "5"
-                                opCode 0: 5
-        col 02 token 1: "value"
-        col 08 token 2: "a"
-                                opCode 1: setValue("a")
-        col 10 token 3: "3"
-                                opCode 2: 3
-        col 12 token 4: "a"
-                                opCode 3: getValue("a")
-        col 14 token 5: "+"
-                                opCode 4: plus()
+        line 0 "1 2 3 rot swap -rot"
+          at 0 "1"
+                        opCode 0: 1
+          at 2 "2"
+                        opCode 1: 2
+          at 4 "3"
+                        opCode 2: 3
+          at 6 "rot"
+                        opCode 3: _rot()
+          at 10 "swap"
+                        opCode 4: _swap()
+          at 15 "-rot"
+                        opCode 5: _dashrot()
+jsCode:
+        0       stack.push(1);
+        1       stack.push(2);
+        2       stack.push(3);
+        3       var n=stack.length-3, a=stack[n];
+		stack[n++]=stack[n], stack[n++]=stack[n], stack[n]=a;
+        4       var n=stack.length-2, a=stack[n];
+		stack[n++]=stack[n], stack[n]=a;
+        5       var n=stack.length-1, c=stack[n];
+		stack[n--]=stack[n], stack[n--]=stack[n], stack[n]=c;
+
+result stack: [3,2,1]
+
+    √ B6.  test rot -rot ok
+
+
+  C.  test defining words
+
+transpiling:
+        line 0 "5 value a 3 a + to a 2 a +"
+          at 0 "5"
+                        opCode 0: 5
+          at 2 "value a"
+                        opCode 1: _setValue("a")
+          at 10 "3"
+                        opCode 2: 3
+          at 12 "a"
+                        opCode 3: _getValue("a")
+          at 14 "+"
+                        opCode 4: _plus()
+          at 16 "to"
+                        opCode 5: _putValue("a")
+          at 21 "2"
+                        opCode 6: 2
+          at 23 "a"
+                        opCode 7: _getValue("a")
+          at 25 "+"
+                        opCode 8: _plus()
 jsCode:
         0       stack.push(5);
         1       var a=stack.pop();
         2       stack.push(3);
         3       stack.push(a);
         4       var tos=stack.pop();stack.push(stack.pop()+tos);
+        5       a=stack.pop();
+        6       stack.push(2);
+        7       stack.push(a);
+        8       var tos=stack.pop();stack.push(stack.pop()+tos);
 
-result stack: [8]
+result stack: [10]
 
-    √ C1.  test value ok
-
-forthCode: ": x 5 + ; 3 x"
+    √ C1.  test value to ok
 
 transpiling:
-        line 0: ": x 5 + ; 3 x"
-        col 00 token 0: ":"
-        col 02 token 1: "x"
-                                opCode 0: setColon("x")
-        col 04 token 2: "5"
-                                opCode 1: 5
-        col 06 token 3: "+"
-                                opCode 2: plus()
-        col 08 token 4: ";"
-                                opCode 3: endColon()
-        col 10 token 5: "3"
-                                opCode 4: 3
-        col 12 token 6: "x"
-                                opCode 5: runColon("x")
+        line 0 ": x 5 + ; 3 x"
+          at 0 ": x"
+                        opCode 0: _setColon("x")
+          at 4 "5"
+                        opCode 1: 5
+          at 6 "+"
+                        opCode 2: _plus()
+          at 8 ";"
+                        opCode 3: _endColon()
+          at 10 "3"
+                        opCode 4: 3
+          at 12 "x"
+                        opCode 5: _runColon("x")
 jsCode:
         0       var x=function(){
-        1               stack.push(5);
-        2               var tos=stack.pop();stack.push(stack.pop()+tos);
-        3       }
-        4       stack.push(3);
-        5       x();
+        1               stack[stack.length-1]+=5;
+        2       }
+        3       stack.push(3);
+        4       x();
 
 result stack: [8]
 
     √ C2.  test : ; ok
 
+transpiling:
+        line 0 "0 10 1 do i + loop"
+          at 0 "0"
+          at 2 "10"
+                        opCode 1: 10
+          at 5 "1"
+                        opCode 2: 1
+          at 7 "do"
+                        opCode 3: _do()
+          at 10 "i"
+                        opCode 4: _i()
+          at 12 "+"
+                        opCode 5: _plus()
+          at 14 "loop"
+                        opCode 6: _loop()
+jsCode:
+        0       stack.push(0);
+        1       stack.push(10);
+        2       stack.push(1);
+        3       var _B0=stack.pop(),_L0=stack.pop(),_R=_L0-_B0,
+                _D0=_R/Math.abs(_R);_L0-=(1-_D0)/2;
+                for(var _i0=_B0;(_L0-_i0)*_D0>0;_i0+=_D0){
+        4               stack.push(_i0);
+        5               var tos=stack.pop();stack.push(stack.pop()+tos);
+        6       }
 
-  9 passing (170ms)
+result stack: [45]
+
+    √ C3.  test do loop ok
+
+transpiling:
+        line 0 "0 1 9 do i + loop"
+          at 0 "0"
+          at 2 "1"
+                        opCode 1: 1
+          at 4 "9"
+                        opCode 2: 9
+          at 6 "do"
+                        opCode 3: _do()
+          at 9 "i"
+                        opCode 4: _i()
+          at 11 "+"
+                        opCode 5: _plus()
+          at 13 "loop"
+                        opCode 6: _loop()
+jsCode:
+        0       stack.push(0);
+        1       stack.push(1);
+        2       stack.push(9);
+        3       var _B0=stack.pop(),_L0=stack.pop(),_R=_L0-_B0,
+                _D0=_R/Math.abs(_R);_L0-=(1-_D0)/2;
+                for(var _i0=_B0;(_L0-_i0)*_D0>0;_i0+=_D0){
+        4               stack.push(_i0);
+        5               var tos=stack.pop();stack.push(stack.pop()+tos);
+        6       }
+
+result stack: [45]
+
+    √ C4.  another way to test do loop ok
+
+transpiling:
+        line 0 "0 1 9 do i + -1 +loop"
+          at 0 "0"
+          at 2 "1"
+                        opCode 1: 1
+          at 4 "9"
+                        opCode 2: 9
+          at 6 "do"
+                        opCode 3: _do()
+          at 9 "i"
+                        opCode 4: _i()
+          at 11 "+"
+                        opCode 5: _plus()
+          at 13 "-1"
+                        opCode 6: -1
+          at 16 "+loop"
+                        opCode 7: _plusLoop()
+jsCode:
+        0       stack.push(0);
+        1       stack.push(1);
+        2       stack.push(9);
+        3       var _B0=stack.pop(),_L0=stack.pop(),_R=_L0-_B0,
+                _D0=_R/Math.abs(_R);_L0-=(1-_D0)/2;
+                for(var _i0=_B0;(_L0-_i0)*_D0>0;_i0+=_D0){
+        4               stack.push(_i0);
+        5               var tos=stack.pop();stack.push(stack.pop()+tos);
+        6               stack.push(-1);
+        7               _i0+=stack.pop()-_D0;
+                }
+
+result stack: [45]
+
+    √ C5.  test do +loop ok
+
+transpiling:
+        line 0 "0 10 1 do i + 2 +loop"
+          at 0 "0"
+          at 2 "10"
+                        opCode 1: 10
+          at 5 "1"
+                        opCode 2: 1
+          at 7 "do"
+                        opCode 3: _do()
+          at 10 "i"
+                        opCode 4: _i()
+          at 12 "+"
+                        opCode 5: _plus()
+          at 14 "2"
+                        opCode 6: 2
+          at 16 "+loop"
+                        opCode 7: _plusLoop()
+jsCode:
+        0       stack.push(0);
+        1       stack.push(10);
+        2       stack.push(1);
+        3       var _B0=stack.pop(),_L0=stack.pop(),_R=_L0-_B0,
+                _D0=_R/Math.abs(_R);_L0-=(1-_D0)/2;
+                for(var _i0=_B0;(_L0-_i0)*_D0>0;_i0+=_D0){
+        4               stack.push(_i0);
+        5               var tos=stack.pop();stack.push(stack.pop()+tos);
+        6               stack.push(2);
+        7               _i0+=stack.pop()-_D0;
+                }
+
+result stack: [25]
+
+    √ C6.  another way test do i +loop ok
+
+transpiling:
+        line 0 "10 1 do cr i 10 1 do dup i * 3 .r loop drop loop"
+          at 0 "10"
+                        opCode 0: 10
+          at 3 "1"
+                        opCode 1: 1
+          at 5 "do"
+                        opCode 2: _do()
+          at 8 "cr"
+                        opCode 3: _cr()
+          at 11 "i"
+                        opCode 4: _i()
+          at 13 "10"
+                        opCode 5: 10
+          at 16 "1"
+                        opCode 6: 1
+          at 18 "do"
+                        opCode 7: _do()
+          at 21 "dup"
+                        opCode 8: _dup()
+          at 25 "i"
+                        opCode 9: _i()
+          at 27 "*"
+                        opCode 10: _multiply()
+          at 29 "3"
+                        opCode 11: 3
+          at 31 ".r"
+                        opCode 12: _dotr()
+          at 34 "loop"
+                        opCode 13: _loop()
+          at 39 "drop"
+                        opCode 14: _drop()
+          at 44 "loop"
+                        opCode 15: _loop()
+jsCode:
+        0       stack.push(10);
+        1       stack.push(1);
+        2       var _B0=stack.pop(),_L0=stack.pop(),_R=_L0-_B0,
+                _D0=_R/Math.abs(_R);_L0-=(1-_D0)/2;
+                for(var _i0=_B0;(_L0-_i0)*_D0>0;_i0+=_D0){
+        3               _out+='\n';
+        4               stack.push(_i0);
+        5               stack.push(10);
+        6               stack.push(1);
+        7               var _B1=stack.pop(),_L1=stack.pop(),_R=_L1-_B1,
+                	_D1=_R/Math.abs(_R);_L1-=(1-_D1)/2;
+                	for(var _i1=_B1;(_L1-_i1)*_D1>0;_i1+=_D1){
+        8                       stack.push(stack[stack.length-1]);
+        9                       stack.push(_i1);
+        10                      stack.push(stack.pop()*stack.pop());
+        11                      stack.push(3);
+        12                      var m=stack.pop(),n=stack.pop().toString();
+				while(n.length<m)n=' '+n;_out+=n;
+        13              }
+        14              stack.pop();
+        15      }
+
+result stack: []
+
+out:
+  1  2  3  4  5  6  7  8  9
+  2  4  6  8 10 12 14 16 18
+  3  6  9 12 15 18 21 24 27
+  4  8 12 16 20 24 28 32 36
+  5 10 15 20 25 30 35 40 45
+  6 12 18 24 30 36 42 48 54
+  7 14 21 28 35 42 49 56 63
+  8 16 24 32 40 48 56 64 72
+  9 18 27 36 45 54 63 72 81
+
+    √ C7.  nested do i loop (55ms)
+
+transpiling:
+        line 0 "10 1 do cr 10 1 do j i * 3 .r loop loop"
+          at 0 "10"
+                        opCode 0: 10
+          at 3 "1"
+                        opCode 1: 1
+          at 5 "do"
+                        opCode 2: _do()
+          at 8 "cr"
+                        opCode 3: _cr()
+          at 11 "10"
+                        opCode 4: 10
+          at 14 "1"
+                        opCode 5: 1
+          at 16 "do"
+                        opCode 6: _do()
+          at 19 "j"
+                        opCode 7: _j()
+          at 21 "i"
+                        opCode 8: _i()
+          at 23 "*"
+                        opCode 9: _multiply()
+          at 25 "3"
+                        opCode 10: 3
+          at 27 ".r"
+                        opCode 11: _dotr()
+          at 30 "loop"
+                        opCode 12: _loop()
+          at 35 "loop"
+                        opCode 13: _loop()
+jsCode:
+        0       stack.push(10);
+        1       stack.push(1);
+        2       var _B0=stack.pop(),_L0=stack.pop(),_R=_L0-_B0,
+                _D0=_R/Math.abs(_R);_L0-=(1-_D0)/2;
+                for(var _i0=_B0;(_L0-_i0)*_D0>0;_i0+=_D0){
+        3               _out+='\n';
+        4               stack.push(10);
+        5               stack.push(1);
+        6               var _B1=stack.pop(),_L1=stack.pop(),_R=_L1-_B1,
+                _D1=_R/Math.abs(_R);_L1-=(1-_D1)/2;
+                for(var _i1=_B1;(_L1-_i1)*_D1>0;_i1+=_D1){
+        7                       stack.push(_i0);
+        8                       stack.push(_i1);
+        9                       stack.push(stack.pop()*stack.pop());
+        10                      stack.push(3);
+        11                      var m=stack.pop(),n=stack.pop().toString();
+				while(n.length<m)n=' '+n;_out+=n;
+        12              }
+        13      }
+
+result stack: []
+
+out:
+  1  2  3  4  5  6  7  8  9
+  2  4  6  8 10 12 14 16 18
+  3  6  9 12 15 18 21 24 27
+  4  8 12 16 20 24 28 32 36
+  5 10 15 20 25 30 35 40 45
+  6 12 18 24 30 36 42 48 54
+  7 14 21 28 35 42 49 56 63
+  8 16 24 32 40 48 56 64 72
+  9 18 27 36 45 54 63 72 81
+
+    √ C8.  nested do i j loop (52ms)
+
+
+  D.  nested colon calls
+
+transpiling:
+        line 0 ": x ( a b -- ) * 3 .r ;"
+          at 0 ": x"
+                        opCode 0: _setColon("x")
+          at 4 "( a b -- ) "
+          at 15 "*"
+                        opCode 1: _multiply()
+          at 17 "3"
+                        opCode 2: 3
+          at 19 ".r"
+                        opCode 3: _dotr()
+          at 22 ";"
+                        opCode 4: _endColon()
+jsCode:
+        0       var x=function(){
+        1               stack.push(stack.pop()*stack.pop());
+        2               stack.push(3);
+        3               var m=stack.pop(),n=stack.pop().toString();
+			while(n.length<m)n=' '+n;_out+=n;
+        4       }
+
+result stack: []
+
+    √ D1.  comment in colon
+
+transpiling:
+        line 0 ": x ( a b -- ) * 3 .r ;"
+          at 0 ": x"
+                        opCode 0: _setColon("x")
+          at 4 "( a b -- ) "
+          at 15 "*"
+                        opCode 1: _multiply()
+          at 17 "3"
+                        opCode 2: 3
+          at 19 ".r"
+                        opCode 3: _dotr()
+          at 22 ";"
+                        opCode 4: _endColon()
+        line 1 ": y ( a -- ) 10 1 do dup i x loop drop ;"
+          at 0 ": y"
+                        opCode 5: _setColon("y")
+          at 4 "( a -- ) "
+          at 13 "10"
+                        opCode 6: 10
+          at 16 "1"
+                        opCode 7: 1
+          at 18 "do"
+                        opCode 8: _do()
+          at 21 "dup"
+                        opCode 9: _dup()
+          at 25 "i"
+                        opCode 10: _i()
+          at 27 "x"
+                        opCode 11: _runColon("x")
+          at 29 "loop"
+                        opCode 12: _loop()
+          at 34 "drop"
+                        opCode 13: _drop()
+          at 39 ";"
+                        opCode 14: _endColon()
+        line 2 ": z ( -- ) 10 1 do cr i y loop ; z"
+          at 0 ": z"
+                        opCode 15: _setColon("z")
+          at 4 "( -- ) "
+          at 11 "10"
+                        opCode 16: 10
+          at 14 "1"
+                        opCode 17: 1
+          at 16 "do"
+                        opCode 18: _do()
+          at 19 "cr"
+                        opCode 19: _cr()
+          at 22 "i"
+                        opCode 20: _i()
+          at 24 "y"
+                        opCode 21: _runColon("y")
+          at 26 "loop"
+                        opCode 22: _loop()
+          at 31 ";"
+                        opCode 23: _endColon()
+          at 33 "z"
+                        opCode 24: _runColon("z")
+jsCode:
+        0       var x=function(){
+        1               stack.push(stack.pop()*stack.pop());
+        2               stack.push(3);
+        3               var m=stack.pop(),n=stack.pop().toString();
+			while(n.length<m)n=' '+n;_out+=n;
+        4       }
+        5       var y=function(){
+        6               stack.push(10);
+        7               stack.push(1);
+        8               var _B0=stack.pop(),_L0=stack.pop(),_R=_L0-_B0,
+                	_D0=_R/Math.abs(_R);_L0-=(1-_D0)/2;
+                	for(var _i0=_B0;(_L0-_i0)*_D0>0;_i0+=_D0){
+        9                       stack.push(stack[stack.length-1]);
+        10                      stack.push(_i0);
+        11                      x();
+        12              }
+        13              stack.pop();
+        14      }
+        15      var z=function(){
+        16              stack.push(10);
+        17              stack.push(1);
+        18              var _B0=stack.pop(),_L0=stack.pop(),_R=_L0-_B0,
+                	_D0=_R/Math.abs(_R);_L0-=(1-_D0)/2;
+                	for(var _i0=_B0;(_L0-_i0)*_D0>0;_i0+=_D0){
+        19                      _out+='\n';
+        20                      stack.push(_i0);
+        21                      y();
+        22              }
+        23      }
+        24      z();
+
+result stack: []
+
+out:
+  1  2  3  4  5  6  7  8  9
+  2  4  6  8 10 12 14 16 18
+  3  6  9 12 15 18 21 24 27
+  4  8 12 16 20 24 28 32 36
+  5 10 15 20 25 30 35 40 45
+  6 12 18 24 30 36 42 48 54
+  7 14 21 28 35 42 49 56 63
+  8 16 24 32 40 48 56 64 72
+  9 18 27 36 45 54 63 72 81
+
+    √ D2.  nested colon (71ms)
+
+  19 passing (442ms)

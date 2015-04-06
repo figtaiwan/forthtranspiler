@@ -4,7 +4,7 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 //    runtime: the source code of predefined runtime enviroment
 //    inputfn: the file name of forth source codes
 //   outputfn: the file name of javascript source codes
-	if(tracing) console.log('\nforthCodes:',JSON.stringify(forthCodes));
+	if(tracing>1) console.log('\nforthCodes:',JSON.stringify(forthCodes));
 	var lines=forthCodes;
 	if(typeof(lines)=='string') lines=forthCodes.split(/\r?\n/);
 	var tokens=[], opCodes=[], defined={}, iCol=[];
@@ -76,23 +76,21 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	//////////////////////////////////////////////////////////////////////////
 	/// constructing words for opCodes
 	//////////////////////////////////////////////////////////////////////////
-	var _doLit=function _doLit(n) { /// doLit ( -- n )
+	var _doLit=function _doLit(n,nextOpc) { /// doLit ( -- n )
 		n=JSON.stringify(n);
-		var adv=1, nextOpc=opCodes[iOpCode+1];
 		if(nextOpc){
 			if 	   (nextOpc==_dup		)
-				codegen.push("stack.push("+n+");"), codegen.push("stack.push("+n+");");
+				iOpCode++,codegen.push("stack.push("+n+");"), codegen.push("stack.push("+n+");");
 			else	if (nextOpc==_plus		)
-				codegen.push("stack[stack.length-1]+="+n+";");
+				iOpCode++,codegen.push("stack[stack.length-1]+="+n+";");
 			else	if (nextOpc==_minus	)
-				codegen.push("stack[stack.length-1]-="+n+";");
+				iOpCode++,codegen.push("stack[stack.length-1]-="+n+";");
 			else	if (nextOpc==_multiply	)
-				codegen.push("stack[stack.length-1]*="+n+";");
+				iOpCode++,codegen.push("stack[stack.length-1]*="+n+";");
 			else
-				codegen.push("stack.push("+n+");"), adv=0; /// no extra advance
+				codegen.push("stack.push("+n+");"); /// no extra advance
 		} else
-				codegen.push("stack.push("+n+");"), adv=0; /// no extra advance
-		return adv;
+				codegen.push("stack.push("+n+");"); /// no extra advance
 	}
 	var _setValue=function _setValu(name) { /// setVal('v') ( n -- )
 		codegen.push("var "+name+"=stack.pop();")
@@ -116,10 +114,21 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	var _runColon=function _runColon(name){ /// <name> ( ... )
 		codegen.push(name+"();");
 	}
+	var	_backslash=function _backslash() { /// '(' ( -- )
+		cmd+=' '+line.substr(iCol[iTok])
+		iTok=tokens.length;
+		showOpInfo('');
+	}
+	var	_parenth=function _parenth() { /// '(' ( -- )
+		var i=iCol[iTok];
+		while(iTok<tokens.length&&!tokens[iTok].match(/\)$/)) iTok++; iTok++;
+		cmd+=' '+line.substring(i,iCol[iTok]);
+		showOpInfo('');
+	}
 	//////////////////////////////////////////////////////////////////////////
 	/// defining words
 	//////////////////////////////////////////////////////////////////////////
-	var cmd='';
+	var cmd, at;
 	var _value=function _value(){ /// value <newName> ( n -- )
 		newName=nextToken();
 		if(newName) {
@@ -184,6 +193,8 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	, "+loop"	: {xt:_plusLoop	,defining:0} /// +loop			( n -- ) /// sam 21050406
 	, "i"		: {xt:_i		,defining:0} /// i				( -- i ) /// sam 21050406
 	, "j"		: {xt:_j		,defining:0} /// j				( -- j ) /// sam 21050406
+	, "("		: {xt:_parenth	,defining:1} /// (				( -- ) /// sam 21050406
+	, "\\"		: {xt:_backslash,defining:1} /// \				( -- ) /// sam 21050406
 	}
 	
 	//////////////////////////////////////////////////////////////////////////
@@ -194,7 +205,7 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		if(iTok<tokens.length){
 			var i=iTok, j=iCol[i];
 			token=tokens[iTok++];
-			if(tracing) console.log('\tcol '+(j<10?'0':'')+j+' token '+i+': '+JSON.stringify(token));
+			if(tracing>1) console.log('\tcol '+(j<10?'0':'')+j+' token '+i+': '+JSON.stringify(token));
 		}
 		return token;
 	}
@@ -224,7 +235,7 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		});
 	}
 	var showOpInfo=function(msg){
-		console.log('\t\t\t\topCode '+opCodes.length+': '+msg);
+		console.log('\t'+at+' '+JSON.stringify(cmd)+(msg?'\n\t\t\topCode '+opCodes.length+': '+msg:''));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -237,13 +248,14 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		for (var i=0;i<lines.length;i++) {
 			forthnline=i+1; 
 			line=lines[i];
-			if(tracing) console.log('\tline '+i+': '+JSON.stringify(line));
+			if(tracing) console.log('\tline '+i+' '+JSON.stringify(line));
 			iCol=[];
 			iTok=0;
 			line.replace(/\S+/g,function(token,j){ iCol[iTok++]=j; }); // iCol for each token
 			iTok=0,tokens=line.split(/\s+/);
 			while(checkNextToken()!==undefined){
 				forthncol=iCol[iTok]+1;
+				at='  at '+iCol[iTok];
 				cmd=token=nextToken();
 				var xt=defined[token];
 				if (xt) {
@@ -289,20 +301,26 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	var forthnline=0,forthncol=0;  //line and col of forth source code
 
 	var opCodes=forth2js(lines);
-	var i=0;
+	if(tracing>1){
+		console.log('opCodes:');
+		opCodes.forEach(function(f,i){
+			var s=f.toString(), m=s.match(/function\s?(\S*\(\))\s*\{([^}]+)/);
+			console.log(i+' '+(m?m[1]==='()'?m[2]:m[1]:JSON.stringify(s)));
+		})
+	}
+	var iOpCode=0;
 
 	//////////////////////////////////////////////////////////////////////////
 	/// transpiling loop to generat jsCodes next
 	//////////////////////////////////////////////////////////////////////////
-	while(i<opCodes.length){
-		var adv=0;
-		if (typeof opCodes[i]=="function") {
-			adv=opCodes[i]( opCodes[i+1] ) || 0;
+	while(iOpCode<opCodes.length){
+		var opCode=opCodes[iOpCode];
+		if (typeof opCode=="function") {
+			opCode();
 		} else {
-			adv=_doLit(opCodes[i],opCodes[i+1]);
+			_doLit(opCode,opCodes[iOpCode+1]);
 		}
-		if (adv) i+=adv;
-		i++;
+		iOpCode++;
 	}
 	return {jsCodes:codegen,sourcemap:sourcemap,opCodes:opCodes};
 }
@@ -328,11 +346,11 @@ var transpile=function(forth) {
 		return adjust;
 	}).join('\n');
 	if(tracing) console.log('jsCode:\n'+jsCode)
-	if(tracing) console.log('code:\n'+code)
+	if(tracing>1) console.log('code:\n'+code)
 	try {
 		var res=eval(code);
 		if(tracing) console.log('\nresult stack: '+JSON.stringify(res.stack)+'\n');
-		if(res.out) console.log('out: '+res.out);
+		if(tracing&&res.out) console.log('out: '+res.out);
 	}
 	catch(e) { console.log(e) }
 	return res;

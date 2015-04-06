@@ -2,7 +2,8 @@ var assert		=require("assert");
 var Transpile	=require("../src/transpile.js");
 var transpile	=Transpile.transpile;
 
-// Transpile.trace(true);
+Transpile.trace(2);
+// /*
 describe(			"A.  test literals"
 	,function(){		///////////////////
 
@@ -26,6 +27,7 @@ describe(			"A.  test literals"
 
 });
 
+// /*
 describe(			"B.  test core words"
 	,function(){		/////////////////////
 
@@ -34,7 +36,7 @@ describe(			"B.  test core words"
 		transpile([		"3 5 +"
 		]).stack,		[8]
 	)})
-
+// /*
 	it(				"B2.  test - numbers ok"
 	,function(){ assert.deepEqual(	////////////////////////
 		transpile([		"5 3 -"
@@ -66,10 +68,11 @@ describe(			"B.  test core words"
 	)})
 
 });
-
+// */
+// /*
 describe(			"C.  test defining words"
 	,function(){		/////////////////////////
-
+// /*
 	it(				"C1.  test value to ok"
 	,function(){ assert.deepEqual(	////////////////////
 		transpile([		"5 value a 3 a + to a 2 a +"
@@ -93,7 +96,8 @@ describe(			"C.  test defining words"
 		transpile([		"0 1 9 do i + loop" // sum( 9, 8, ... 2, 1 )
 		]).stack,		[45]
 	)})
-
+// */
+// /*
 	it(				"C5.  test do +loop ok"
 	,function(){ assert.deepEqual(	//////////////////
 		transpile([		"0 1 9 do i + -1 +loop" // sum( 9, 8, ... 2, 1 )
@@ -133,5 +137,26 @@ describe(			"C.  test defining words"
 						"  8 16 24 32 40 48 56 64 72\n"+
 						"  9 18 27 36 45 54 63 72 81"
 	)})
-			
+
 });
+// */
+// /*
+describe(			"D.  nested colon calls"
+	,function(){		/////////////////////////
+
+	it(				"D1.  comment in colon"
+	,function(){ assert.deepEqual(	////////////////////
+		transpile([		": x ( a b -- ) * 3 .r ;"
+		]).stack,		[]
+	)})
+
+	it(				"D2.  nested colon"
+	,function(){ assert.deepEqual(	////////////////////
+		transpile([		": x ( a b -- ) * 3 .r ;" // \ print out a*b
+				  ,		": y ( a -- ) 10 1 do dup i x loop drop ;"
+				  ,		": z ( -- ) 10 1 do cr i y loop ; z"
+		]).stack,		[]
+	)})
+
+});
+// */
