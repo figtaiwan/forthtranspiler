@@ -2,8 +2,9 @@ var assert		=require("assert");
 var Transpile	=require("../src/transpile.js");
 var transpile	=Transpile.transpile;
 
-Transpile.trace(0);
+// Transpile.trace(2);
 // /*
+Transpile.trace(0);
 describe(			"A.  test literals"
 	,function(){		///////////////////
 
@@ -68,7 +69,6 @@ describe(			"B.  test core words"
 	)})
 
 });
-// */
 // /*
 describe(			"C.  test defining words"
 	,function(){		/////////////////////////
@@ -96,7 +96,6 @@ describe(			"C.  test defining words"
 		transpile([		"0 1 9 do i + loop" // sum( 9, 8, ... 2, 1 )
 		]).stack,		[45]
 	)})
-// */
 // /*
 	it(				"C5.  test do +loop ok"
 	,function(){ assert.deepEqual(	//////////////////
@@ -139,7 +138,6 @@ describe(			"C.  test defining words"
 	)})
 
 });
-// */
 // /*
 describe(			"D.  nested colon calls"
 	,function(){		/////////////////////////
@@ -175,3 +173,13 @@ describe(			"D.  nested colon calls"
 
 });
 // */
+describe(			"E.  for next"
+	,function(){		/////////////////////////
+
+	it(				"E1.  for next ok"
+	,function(){ assert.deepEqual(	////////////////////
+		transpile([		"0 9 for i dup . + next"
+		]).stack,		[45]
+	)})
+			
+});

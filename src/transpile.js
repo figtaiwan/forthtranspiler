@@ -72,6 +72,16 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	var	_j=function _j() { /// - ( -- i )
 		codegen.push("stack.push(_i"+(rDepth-1)+");");
 	}
+	var _for=function _for() { /// for ( n -- )
+		rDepth++;
+		codegen.push(
+			"var _i"+rDepth+"=stack.pop()+1;"+
+			"while(--_i"+rDepth+">=0){");
+	}
+	var _next=function _next() { /// next ( -- )
+		rDepth--;
+		codegen.push("}");
+	}
 
 	//////////////////////////////////////////////////////////////////////////
 	/// constructing words for opCodes
@@ -195,6 +205,8 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	, "j"		: {xt:_j		,defining:0} /// j				( -- j ) /// sam 21050406
 	, "("		: {xt:_parenth	,defining:1} /// (				( -- ) /// sam 21050406
 	, "\\"		: {xt:_backslash,defining:1} /// \				( -- ) /// sam 21050406
+	, "for"		: {xt:_for		,defining:0} /// for			( n -- ) /// sam 21050406
+	, "next"	: {xt:_next		,defining:0} /// next			( -- ) /// sam 21050406
 	}
 	
 	//////////////////////////////////////////////////////////////////////////
