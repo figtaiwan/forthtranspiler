@@ -182,7 +182,7 @@ describe(			"E.  for next"
 
 	it(				"E2.  for next ok"
 	,function(){ assert.deepEqual(	////////////////////
-		transpile([		"0 4000000 for 1 + next ."
+		transpile([		"0 4000000 for 1+ next ."
 		]).out,		' 4000001'
 	)})
 

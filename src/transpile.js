@@ -376,7 +376,7 @@ var transpile=function(forth) {
 	try {
 		var res=eval(code);
 		if(tracing) console.log('\nresult stack: '+JSON.stringify(res.stack)+'\n');
-		if(tracing&&res.out) console.log('out: '+res.out);
+		if(res.out) console.log('out: '+res.out);
 	}
 	catch(e) { console.log(e) }
 	return res;

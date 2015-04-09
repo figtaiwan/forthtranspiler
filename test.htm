@@ -1,62 +1,68 @@
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<!-- saved from url=(0045)file:///C:/ksana2015/forthtranspiler/test.htm -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="stylesheet" type="text/css" href="test.css">
-<script src=  'src/runtime.js'></script>
-<script src='src/transpile.js'></script>
-<script src=     'jefvm.v3.js'></script>
-<script src= 'jefvm.v3_ext.js'></script>
+<script src="src/runtime.js"></script>
+<script src="src/transpile.js"></script>
+<script src="jefvm.v3.js"></script>
+<script src="jefvm.v3_ext.js"></script>
 <script>
 function init(){
-	window.transpile=transpile;
+	window.transpile=transpile; msgJs.innerText='';
 	eval(tool.value);
 }
 function clicked(){
+	btnRunJs.style.color='black';
 	var old=msgJs.style.color;
 	eval(tool.value);
-	msgJs.innerText="after clicking button, please wait until done"
+	msgJs.innerText="after clicking button, to wait until done needs several minutes"
 	msgJs.style.color='red';
 	setTimeout(function(){
-		jefTime(1,test1.value)
-		jefTime(2,test2.value)
-		transpileTime(3,test3.value)
-		transpileTime(4,test4.value)
-		js1Time(5,test5.value)
-		js2Time(6,test6.value)
-		msgJs.style.color=old;
+		jefTime(1,test1.value);
+		jefTime(2,test2.value);
+		transpileTime(3,test3.value);
+		transpileTime(4,test4.value);
+		js1Time(5,test5.value);
+		js2Time(6,test6.value);
+		msgJs.style.color=old, btnRunJs.style.color='red'
 	},0);
 }
 </script>
-<body onload='init()'>
-<textarea id='tool'>
-window.jefTime=function(i,testCode){
-  var t=new Date().getTime(); vm.exec(testCode);
-  t=new Date().getTime()-t;
-  msgJs.innerText+='\njefTime('+i+',"'+testCode+'") needs '+t+' ms';
+</head><body onload="init()">
+<textarea id="tool">window.jefTime=function(i,leftCode){
+  var t0=new Date().getTime(); vm.exec(leftCode);
+  var t=new Date().getTime()-t0;
+  msgJs.innerText+='\njefTime('+i+',"'+leftCode+'") needs '+t+' ms';
 }
-window.transpileTime=function(i,testCode){
-  var t=new Date().getTime(); transpile(testCode);
-  t=new Date().getTime()-t;
-  msgJs.innerText+='\ntranspileTime('+i+',"'+testCode+'") needs '+t+' ms';
+window.transpileTime=function(i,leftCode){
+  var t0=new Date().getTime(); transpile(leftCode);
+  var t=new Date().getTime()-t0;
+  msgJs.innerText+='\ntranspileTime('+i+',"'+leftCode+'") needs '+t+' ms';
 }
-window.js1Time=function(i,testCode){
-  var t=new Date().getTime(); eval(testCode);
-  t=new Date().getTime()-t;
-  msgJs.innerText+='\njs1Time('+i+',"'+testCode+'") needs '+t+' ms';
+window.js1Time=function(i,leftCode){
+  var t0=new Date().getTime(); eval(leftCode);
+  var t=new Date().getTime()-t0;
+  msgJs.innerText+='\njs1Time('+i+',"'+leftCode+'") needs '+t+' ms';
 }
-window.js2Time=function(i,testCode){
-  var t=new Date().getTime(), x;
-  eval('x=function(){'+testCode+'}');
-  console.log(x)
-  x();
-  t=new Date().getTime()-t;
-  msgJs.innerText+='\njs2Time('+i+',"'+testCode+'") needs '+t+' ms';
+window.js2Time=function(i,leftCode){
+  var t0=new Date().getTime(), js; eval('js=function(){'+leftCode+'}'), js();
+  var t=new Date().getTime()-t0;
+  msgJs.innerText+='\njs2Time('+i+',"'+leftCode+'") needs '+t+' ms';
 }
+
 </textarea><br>
-<button id='btnRunJs' onClick='clicked()'>compare the following codes</button><br>
-<span>1.</span><textarea id="test1">  0 4000000 for 1+ next .</textarea>by jefTime(1,testCode)<br>
-<span>2.</span><textarea id="test2">: x 4000000 for 1+ next . ; 0 x</textarea>by jefTime(2,testCode)<br>
-<span>3.</span><textarea id="test3">  0 4000000 for 1+ next .</textarea>by transpileTime(3,testCode)<br>
-<span>4.</span><textarea id="test4">: x 4000000 for 1+ next . ; 0 x</textarea>by transpileTime(4,testCode)<br>
-<span>5.</span><textarea id="test5">i=4000000,n=0;while(i--){n++};console.log(n)</textarea>by js1Time(5,testCode)<br>
-<span>6.</span><textarea id="test6">i=4000000,n=0;while(i--){n++};console.log(n)</textarea>by js2Time(6,testCode)
-<pre id='msgJs'></pre>
-</body>
+<button id="btnRunJs" onclick="clicked()" style="color:red">click here to test the following 6 codes (needs several minutes)</button><br>
+<span>1.</span><textarea id="test1">  0 4000000 for 1+ next .</textarea>by jefTime(1,leftCode)<br>
+<span>2.</span><textarea id="test2">: x 4000000 for 1+ next . ; 0 x</textarea>by jefTime(2,leftCode)<br>
+<span>3.</span><textarea id="test3">  0 4000000 for 1+ next .</textarea>by transpileTime(3,leftCode)<br>
+<span>4.</span><textarea id="test4">: x 4000000 for 1+ next . ; 0 x</textarea>by transpileTime(4,leftCode)<br>
+<span>5.</span><textarea id="test5">var _i=4000000,_n=0;while(_i-->=0){_n++};console.log(_n)</textarea>by js1Time(5,leftCode)<br>
+<span>6.</span><textarea id="test6">var _i=4000000,_n=0;while(_i-->=0){_n++};console.log(_n)</textarea>by js2Time(6,leftCode)
+<pre id="msgJs">after clicking button, to wait until done needs several minutes
+jefTime(1,"  0 4000000 for 1+ next .") needs 7581 ms
+jefTime(2,": x 4000000 for 1+ next . ; 0 x") needs 2719 ms
+transpileTime(3,"  0 4000000 for 1+ next .") needs 64 ms
+transpileTime(4,": x 4000000 for 1+ next . ; 0 x") needs 56 ms
+js1Time(-1,"i=4000000,n=0;while(i-->=0){n++};console.log(n)") needs 967 ms
+js2Time(-1,"i=4000000,n=0;while(i-->=0){n++};console.log(n)") needs 968 ms</pre>
+</body></html>
