@@ -82,6 +82,10 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		rDepth--;
 		codegen.push("}");
 	}
+	
+	var _oneplus=function _oneplus() { /// 1+ ( n -- n+1 )
+		codegen.push("stack[stack.length-1]++;");
+	}
 
 	//////////////////////////////////////////////////////////////////////////
 	/// constructing words for opCodes
@@ -207,6 +211,7 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	, "\\"		: {xt:_backslash,defining:1} /// \				( -- ) /// sam 21050406
 	, "for"		: {xt:_for		,defining:0} /// for			( n -- ) /// sam 21050406
 	, "next"	: {xt:_next		,defining:0} /// next			( -- ) /// sam 21050406
+	, "1+"		: {xt:_oneplus	,defining:0} /// 1+				( n -- n+1 )
 	}
 	
 	//////////////////////////////////////////////////////////////////////////
@@ -227,7 +232,7 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 			token=tokens[iTok];
 		return token;
 	}
-
+if(typeof window==='undefined'){
 	var SourceMapGenerator=require("source-map").SourceMapGenerator;
 	var sourcemap=new SourceMapGenerator({file:outputfn||inputfn+"js"});
 
@@ -246,6 +251,9 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		  name: name
 		});
 	}
+}else{
+	var addMapping=function(name) {}
+}
 	var showOpInfo=function(msg){
 		if(tracing) console.log('\t'+at+' '+JSON.stringify(cmd)+(msg?'\n\t\t\topCode '+opCodes.length+': '+msg:''));
 	}
@@ -264,7 +272,7 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 			iCol=[];
 			iTok=0;
 			line.replace(/\S+/g,function(token,j){ iCol[iTok++]=j; }); // iCol for each token
-			iTok=0,tokens=line.split(/\s+/);
+			iTok=0,tokens=line.trim().split(/\s+/);
 			while(checkNextToken()!==undefined){
 				forthncol=iCol[iTok]+1;
 				at='  at '+iCol[iTok];
@@ -337,7 +345,13 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	return {jsCodes:codegen,sourcemap:sourcemap,opCodes:opCodes};
 }
 
-var runtimecode	=require("fs").readFileSync("./src/runtime.js","utf8");
+if(typeof runtimecode==='undefined'){
+	var runtimecode=require("fs").readFileSync("./src/runtime.js","utf8");
+	var i=runtimecode.indexOf('='); runtimecode=runtimecode.substr(i+1);
+	console.log('runtimecode',runtimecode)
+	runtimecode=JSON.parse(runtimecode);
+}
+runtimecode=runtimecode.join('\n')+'\n';
 var transpile=function(forth) {
 	var trans=transpilejs(forth,runtimecode,"test");
 	var code =	"(function(){"				+"\n"
@@ -370,4 +384,8 @@ var transpile=function(forth) {
 var trace=function(flag){
 	tracing=flag;
 }
-module.exports={transpile:transpile,trace:trace};
+if(typeof window==='object'){
+	window.transpile=transpile;
+} else {
+	module.exports={transpile:transpile,trace:trace};
+}

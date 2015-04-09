@@ -1,2 +1,3 @@
-var stack=[], _out='';
-var runtime={stack:stack,out:_out};
+var runtimecode=
+["var stack=[], _out='';"
+,"var runtime={stack:stack,out:_out};"]

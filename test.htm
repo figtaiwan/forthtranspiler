@@ -1,37 +1,62 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="stylesheet" type="text/css" href="test.css">
-<script src='jefvm.v3.js'    ></script>
-<script src='jefvm.v3_ext.js'></script>
+<script src=  'src/runtime.js'></script>
+<script src='src/transpile.js'></script>
+<script src=     'jefvm.v3.js'></script>
+<script src= 'jefvm.v3_ext.js'></script>
 <script>
 function init(){
+	window.transpile=transpile;
 	eval(tool.value);
 }
 function clicked(){
-	var old=msgJs.style.backgroundColor;
-	msgJs.style.backgroundColor = '#FF8';
+	var old=msgJs.style.color;
+	eval(tool.value);
+	msgJs.innerText="after clicking button, please wait until done"
+	msgJs.style.color='red';
 	setTimeout(function(){
-		eval(js.value);
-		msgJs.style.backgroundColor = old;
+		jefTime(1,test1.value)
+		jefTime(2,test2.value)
+		transpileTime(3,test3.value)
+		transpileTime(4,test4.value)
+		js1Time(5,test5.value)
+		js2Time(6,test6.value)
+		msgJs.style.color=old;
 	},0);
 }
 </script>
 <body onload='init()'>
 <textarea id='tool'>
-window.jefTime=function(jefCode){
-  var t=new Date().getTime(); vm.exec(jefCode);
+window.jefTime=function(i,testCode){
+  var t=new Date().getTime(); vm.exec(testCode);
   t=new Date().getTime()-t;
-  msgJs.innerText+='\nrun jef code "'+jefCode+'" needs '+t+' ms';
+  msgJs.innerText+='\njefTime('+i+',"'+testCode+'") needs '+t+' ms';
 }
-window.jsTime=function(jsCode){
-  var t=new Date().getTime(); eval(jsCode);
+window.transpileTime=function(i,testCode){
+  var t=new Date().getTime(); transpile(testCode);
   t=new Date().getTime()-t;
-  msgJs.innerText+='\nrun js  code "'+jsCode+'" needs '+t+' ms';
+  msgJs.innerText+='\ntranspileTime('+i+',"'+testCode+'") needs '+t+' ms';
+}
+window.js1Time=function(i,testCode){
+  var t=new Date().getTime(); eval(testCode);
+  t=new Date().getTime()-t;
+  msgJs.innerText+='\njs1Time('+i+',"'+testCode+'") needs '+t+' ms';
+}
+window.js2Time=function(i,testCode){
+  var t=new Date().getTime(), x;
+  eval('x=function(){'+testCode+'}');
+  console.log(x)
+  x();
+  t=new Date().getTime()-t;
+  msgJs.innerText+='\njs2Time('+i+',"'+testCode+'") needs '+t+' ms';
 }
 </textarea><br>
-<button id='btnRunJs' onClick='clicked()'>run the following js code</button><br>
-<textarea id="js">
-jefTime(    '2000000 for next');
-jefTime(': x 2000000 for next ; x');
-jsTime ('_i= 2000000; while(_i--){}');</textarea>
-<pre id='msgJs'>after the js code running, please wait until done</pre>
+<button id='btnRunJs' onClick='clicked()'>compare the following codes</button><br>
+<span>1.</span><textarea id="test1">  0 4000000 for 1+ next .</textarea>jefTime(1,testCode)<br>
+<span>2.</span><textarea id="test2">: x 4000000 for 1+ next . ; 0 x</textarea>jefTime(2,testCode)<br>
+<span>3.</span><textarea id="test3">  0 4000000 for 1+ next .</textarea>transpileTime(3,testCode)<br>
+<span>4.</span><textarea id="test4">: x 4000000 for 1+ next . ; 0 x</textarea>transpileTime(4,testCode)<br>
+<span>5.</span><textarea id="test5">i=4000000,n=0;while(i--){n++};console.log(n)</textarea>js1Time(5,testCode)<br>
+<span>6.</span><textarea id="test6">i=4000000,n=0;while(i--){n++};console.log(n)</textarea>js2Time(6,testCode)
+<pre id='msgJs'></pre>
 </body>

@@ -3,7 +3,6 @@ var Transpile	=require("../src/transpile.js");
 var transpile	=Transpile.transpile;
 
 // Transpile.trace(2);
-// /*
 Transpile.trace(0);
 describe(			"A.  test literals"
 	,function(){		///////////////////
@@ -27,7 +26,6 @@ describe(			"A.  test literals"
 	)})
 
 });
-
 // /*
 describe(			"B.  test core words"
 	,function(){		/////////////////////
@@ -172,7 +170,7 @@ describe(			"D.  nested colon calls"
 	)})
 
 });
-// */
+
 describe(			"E.  for next"
 	,function(){		/////////////////////////
 
@@ -181,5 +179,12 @@ describe(			"E.  for next"
 		transpile([		"0 9 for i dup . + next"
 		]).stack,		[45]
 	)})
-			
+
+	it(				"E2.  for next ok"
+	,function(){ assert.deepEqual(	////////////////////
+		transpile([		"0 4000000 for 1 + next ."
+		]).out,		' 4000001'
+	)})
+
 });
+//*/
