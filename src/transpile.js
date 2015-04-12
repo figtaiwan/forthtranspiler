@@ -1,4 +1,21 @@
+
 var tracing=0;
+var pretty=function(jsCode){
+	if(typeof jsCode==='string')jsCode=jsCode.split(/\r?\n/);
+	var indent='';
+	return jsCode.map(function(L,i){
+	  var i=i.toString();return '/*'+('0'.substr(0,2-i.length)+i)+'*/ '+L}).join('\n').replace(/(\/\*\d+\*\/)?([^\r\n]+)/g,function(line,i){
+		var m=line.match(/(\/\*\d+\*\/)?([^\r\n]+)/), m1=m[1]||'    ', m2=m[2];
+		if(m2.match(/^\s*\}/)){
+			indent=indent.substr(0,indent.length-2);
+		}
+		line=m1+indent+m2.replace(/\t/g,'\\t');
+		if(m2.match(/\{\s*(\/\/.*)?$/)){
+			indent+='  '
+	  }
+	  return line;
+	});
+}
 var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 // forthCodes: forth source codes
 //    runtime: the source code of predefined runtime enviroment
@@ -53,9 +70,9 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		codegen.push(
 			"var _B"+rDepth+"=stack.pop(),"+
 			    "_L"+rDepth+"=stack.pop(),"+
-			    "_R=_L"+rDepth+"-_B"+rDepth+",\n\t\t"+
+			    "_R=_L"+rDepth+"-_B"+rDepth+",\n    "+
 				"_D"+rDepth+"=_R/Math.abs(_R);"+
-				"_L"+rDepth+"-=(1-_D"+rDepth+")/2;\n\t\t"+
+				"_L"+rDepth+"-=(1-_D"+rDepth+")/2;\n  "+
 			"for(var _i"+rDepth+"=_B"+rDepth+";"+
 				"(_L"+rDepth+"-_i"+rDepth+")*_D"+rDepth+">0;"+
 				"_i"+rDepth+"+=_D"+rDepth+"){");
@@ -64,7 +81,7 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		codegen.push("}"),rDepth--;
 	}
 	var _plusLoop=function _plusLoop() { /// +loop ( n -- )
-		codegen.push("_i"+rDepth+"+=stack.pop()-_D"+rDepth+";\n\t\t}"),rDepth--;
+		codegen.push("_i"+rDepth+"+=stack.pop()-_D"+rDepth+";\n}"),rDepth--;
 	}
 	var	_i=function _i() { /// - ( -- i )
 		codegen.push("stack.push(_i"+rDepth+");");
@@ -82,11 +99,23 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		rDepth--;
 		codegen.push("}");
 	}
-	
 	var _oneplus=function _oneplus() { /// 1+ ( n -- n+1 )
 		codegen.push("stack[stack.length-1]++;");
 	}
-
+	var _if=function _if() { /// if ( flag -- )
+		codegen.push('if(stack.pop()){');
+	}
+	var _else=function _else() { /// else ( -- )
+		codegen.push('}else{');
+	}
+	var _then=function _then() { /// then ( -- )
+		codegen.push('}');
+	}
+	var _words=function _words() {
+		var w=Object.keys(words), nw=w.length, x=Object.keys(defined), nx=x.length;
+		var t=JSON.stringify(nw+' primitives\n'+w.join(' ')+'\n'+nx+' extra defined'+(nx?'\n'+x.join(' '):''));
+		codegen.push('_out+='+t+';');
+	}
 	//////////////////////////////////////////////////////////////////////////
 	/// constructing words for opCodes
 	//////////////////////////////////////////////////////////////////////////
@@ -139,6 +168,24 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		cmd+=' '+line.substring(i,iCol[iTok]);
 		showOpInfo('');
 	}
+	var _setCode=function _runCode(code){ /// <name> ( ... )
+		codegen.push(code);
+	}
+	var _runCode=function _runCode(name){ /// <name> ( ... )
+		codegen.push(name+"();");
+	}
+	var _plustoValue=function _plustoValu(name) { /// plustoValue('v') ( n -- )
+		codegen.push(name+"+=stack.pop();")
+		return 1;
+	}
+	var _seeDefined=function _seeDefined(name) { /// _seeDefined(name) ( -- )
+		var t=words[name];
+		if(t)
+			t=JSON.stringify(t.xt.toString());
+		else if(t=defined[name])
+			t=name;
+		codegen.push('_out+='+t+';');
+	}
 	//////////////////////////////////////////////////////////////////////////
 	/// defining words
 	//////////////////////////////////////////////////////////////////////////
@@ -183,6 +230,48 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		eval('newXt=function(){_runColon("'+newName+'")}');
 		defined[newName]=newXt; // then use newName to runColon
 	}
+	var _code=function _code() { /// code <name> <function> end-code ( -- )
+		var newName=nextToken(), _j, _k, _f;
+		if(_j<0)
+			throw 'to code "'+_newName+'" need end-code at line '+iLin+' column '+iCol[iTok];
+		var _k=iCol[iTok];
+		cmd+=' '+newName+' ', _f='';
+		while((_j=line.indexOf('end-code'))<0){
+			_f+=line.substring(k)+'\n',_k=0;
+			if(++iLin<lines.length)line=lines[iLin];
+		};
+		if(_j<0)
+			throw "\"code "+newName+"\" needs \"end-code\" to close at line "+iLin+" column "+line.length;
+		_f+=line.substring(_k,_j);
+		cmd+=_f+line.substr(_j,8);
+		_f='_setCode("var '+newName+'=function '+newName+'(){'+_f.trim()+'}")';
+		showOpInfo(_f);
+		eval('newXt=function(){'+_f+'}');
+		opCodes.push( newXt ); // endColon to end colon defintion
+		addMapping(token), jsline++;
+		if(!_k){
+			iCol=[],iTok=0;
+			iCol=line.replace(/\S+/g,function(tkn,col){iCol[iTok++]=col});
+			tokens=line.split(/\s+/);
+		}
+		iTok=tokens.indexOf('end-code')+1;
+		eval('newXt=function(){_runCode("'+newName+'")}');
+		defined[newName]=newXt; // then use newName to runCode
+	}
+	var _plusto=function _plusto(){ /// +to <valueName> ( n -- )
+		var valueName=nextToken();
+		eval('xt=function(){_plustoValue("'+valueName+'")}');
+		if(tracing) showOpInfo('_plustoValue("'+valueName+'")');
+		opCodes.push( xt ); // we use valueName to putValue
+		addMapping('+to '+valueName), jsline++;
+	}
+	var _see=function _see(){ /// see <valueName> ( -- )
+		var name=nextToken(), str='_seeDefined("'+name+'")';
+		eval('xt=function(){'+str+'}');
+		if(tracing) showOpInfo(str);
+		opCodes.push( xt );
+		addMapping('see '+name), jsline++;
+	}
 	//////////////////////////////////////////////////////////////////////////
 	/// name list
 	//////////////////////////////////////////////////////////////////////////
@@ -212,6 +301,13 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	, "for"		: {xt:_for		,defining:0} /// for			( n -- ) /// sam 21050406
 	, "next"	: {xt:_next		,defining:0} /// next			( -- ) /// sam 21050406
 	, "1+"		: {xt:_oneplus	,defining:0} /// 1+				( n -- n+1 )
+	, "if"		: {xt:_if		,defining:0} /// if				( flag -- )
+	, "else"	: {xt:_else		,defining:0} /// else			( -- )
+	, "then"	: {xt:_then		,defining:0} /// then			( -- )
+	, "code"	: {xt:_code		,defining:1} /// code <name> <jsStatement> end-code ( -- )
+	, "+to"		: {xt:_plusto	,defining:1} /// +to <name>		( n -- )
+	, "see"		: {xt:_see		,defining:1} /// see <name>		( -- )
+	, "words"	: {xt:_words	,defining:0} /// words			( -- )
 	}
 	
 	//////////////////////////////////////////////////////////////////////////
@@ -252,7 +348,8 @@ if(typeof window==='undefined'){
 		});
 	}
 }else{
-	var addMapping=function(name) {}
+	var addMapping=function(name) {};
+	window.words=words;
 }
 	var showOpInfo=function(msg){
 		if(tracing) console.log('\t'+at+' '+JSON.stringify(cmd)+(msg?'\n\t\t\topCode '+opCodes.length+': '+msg:''));
@@ -296,7 +393,7 @@ if(typeof window==='undefined'){
 					} else {
 						var n=(parseFloat(token));
 						if (isNaN(n)) {
-							var M=token.match(/^'(\S+)'$/);
+							var M=token.match(/^'(\S*)'$/);
 							if (M) {
 								var str=M[1];
 								if(tracing) showOpInfo(JSON.stringify(str));
@@ -348,35 +445,50 @@ if(typeof window==='undefined'){
 if(typeof runtimecode==='undefined'){
 	var runtimecode=require("fs").readFileSync("./src/runtime.js","utf8");
 	var i=runtimecode.indexOf('='); runtimecode=runtimecode.substr(i+1);
-	console.log('runtimecode',runtimecode)
+//	console.log('runtimecode',runtimecode)
 	runtimecode=JSON.parse(runtimecode);
 }
-runtimecode=runtimecode.join('\n')+'\n';
+runtimecode=runtimecode.join('\n');
 var transpile=function(forth) {
-	var trans=transpilejs(forth,runtimecode,"test");
-	var code =	"(function(){"				+"\n"
-			 +	runtimecode					+"\n"
-			 +	trans.jsCodes.join("\n")	+"\n"
-			 +	"runtime.out=_out;"			+"\n"
-			 +	"return runtime;"			+"\n"
+	if(typeof forth==='string')
+		forth=forth.split(/\r?\n/);
+	forth.forEach(function(line){
+		if(typeof window==='undefined')
+			line=chalk.bold.green(line);
+		console.log('trans <-- '+line);
+	});
+	var jsCode=transpilejs(forth,runtimecode,"test").jsCodes.join('\n');
+//	jsCode=pretty(jsCode);
+	var code =	"(function(){"		+"\n"
+			 +	runtimecode			+"\n"
+			 +	jsCode				+"\n"
+			 +	"runtime.out=_out;"	+"\n"
+			 +	"return runtime;"	+"\n"
 			 +	"})()";
-	var indent='\t';
-	var jsCode=trans.jsCodes.map(function(line,i){
-		if(line.match(/^\s*\}/)){
-			indent=indent.substr(0,indent.length-1);
-		}
-		var adjust='\t'+i+indent+line;
-		if(line.match(/\{\s*$/)){
-			indent+='\t'
-		}
-		return adjust;
-	}).join('\n');
 	if(tracing) console.log('jsCode:\n'+jsCode)
 	if(tracing>1) console.log('code:\n'+code)
 	try {
 		var res=eval(code);
 		if(tracing) console.log('\nresult stack: '+JSON.stringify(res.stack)+'\n');
-		if(res.out) console.log('out: '+res.out);
+		if(res.out){
+			var T=res.out.split(/\r?\n/).filter(function(t){return t}).map(function(t){
+				var m=n=0;
+				t=t.replace(/\S+/g,function(tkn,col){
+					var x='';
+					if(col-m>=68)
+						x+='\n',m=n;
+					else
+						n=col;
+					return x+tkn
+				});
+				return t;
+			});
+			T=T.join('\n').split('\n').map(function(t){
+				if(typeof window==='undefined')t=chalk.bold.yellow(t);
+				return 'trans --> '+t
+			}).join('\n');
+			console.log(T);
+		}
 	}
 	catch(e) { console.log(e) }
 	return res;
@@ -385,7 +497,8 @@ var trace=function(flag){
 	tracing=flag;
 }
 if(typeof window==='object'){
-	window.transpile=transpile;
+	window.Transpile={transpile:transpile,trace:trace};
 } else {
-	module.exports={transpile:transpile,trace:trace};
+	var chalk=require('chalk');
+	module.exports  ={transpile:transpile,trace:trace};
 }

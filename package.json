@@ -4,6 +4,7 @@
   "description": "",
   "main": "f2js.js",
   "dependencies": {
+    "chalk": "^1.0.0",
     "source-map": "*"
   },
   "devDependencies": {},

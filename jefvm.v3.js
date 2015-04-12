@@ -165,9 +165,11 @@ function JeForthVM() {
     do{	this.token=tkn=nextToken.call(this);	// get a token
 			if (tkn) {					// break if no more
 				var w=nameWord[tkn];	// get word if token is already defined
-				if (w)
-				  execute.apply(this,[w]);		// execute or compile the word
-				else {	n=extNum.apply(this,[tkn]);													//	v1
+				if (w){
+				//	if(!this.compiling)
+				//		throw "compile-only word:"+tkn;
+					execute.apply(this,[w]);		// execute or compile the word
+				}else{	n=extNum.apply(this,[tkn]);													//	v1
 					if(n===undefined)
 						n=extQuotedStr.apply(this,[tkn]);											//	v1
 					if(n===undefined)
