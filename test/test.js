@@ -224,7 +224,7 @@ describe(			"E.  for next"
 	it(				'E13.  see ok'
 	,function(){ assert.deepEqual(	////////////////////
 		transpile([		"see ."
-		]).out,			"function _dot() { /// . ( n -- )\r\n\t\tcodegen.push(\"_out+=' '+stack.pop();\");\r\n\t}"
+		]).out,			'function _dot() { /// . ( n -- )\r\n\t\tcodegen.push(\r\n\t\t\t"_out+=\' \'+stack.pop();"\r\n\t\t);\r\n\t}'
 	)})
 
 	it(				'E14.  words ok'

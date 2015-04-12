@@ -1,20 +1,29 @@
 
 var tracing=0;
-var pretty=function(jsCode){
-	if(typeof jsCode==='string')jsCode=jsCode.split(/\r?\n/);
+if(typeof window==='object'){
+  window.pretty=function(jsCode,addLineNo){				// jsCode is an array of strings
+	if(typeof jsCode==='string')
+		jsCode=jsCode.trim().split(/\s*\r?\n\s*/);	// if jsCode is string, breaks into lines
 	var indent='';
-	return jsCode.map(function(L,i){
-	  var i=i.toString();return '/*'+('0'.substr(0,2-i.length)+i)+'*/ '+L}).join('\n').replace(/(\/\*\d+\*\/)?([^\r\n]+)/g,function(line,i){
+	return jsCode.map(function(L,i){				// each line L could include \n
+		if(addLineNo){
+			var no=i.toString();
+			no=('0'.substr(0,2-no.length)+no);		// 2-digit
+			L='/*'+no+'*/ '+L;
+		}
+	    return L;
+	}).join('\n').replace(/(\/\*\d+\*\/)?([^\r\n]+)/g,function(line,i){
 		var m=line.match(/(\/\*\d+\*\/)?([^\r\n]+)/), m1=m[1]||'    ', m2=m[2];
-		if(m2.match(/^\s*\}/)){
+		if(m2.match(/^\s*(\}|\))/)){
 			indent=indent.substr(0,indent.length-2);
 		}
 		line=m1+indent+m2.replace(/\t/g,'\\t');
-		if(m2.match(/\{\s*(\/\/.*)?$/)){
+		if(m2.match(/(\{|\()\s*(\/\/.*)?$/)){
 			indent+='  '
 	  }
 	  return line;
 	});
+  }
 }
 var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 // forthCodes: forth source codes
@@ -31,90 +40,147 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	//////////////////////////////////////////////////////////////////////////
 	// forth core words
 	//////////////////////////////////////////////////////////////////////////
-	var _dup=function _dup() { /// dup ( n -- n n ) // 20150405 sam, keep name in function so that later can be shown
-		codegen.push("stack.push(stack[stack.length-1]);");
+	var _dup=function _dup() { /// dup ( n -- n n )
+		// 20150405 sam, keep name in function so that later can be shown
+		codegen.push(
+			"stack.push(stack[stack.length-1]);"
+		);
 	}
 	var _drop=function _drop() { /// drop ( n -- )
-		codegen.push("stack.pop();");
+		codegen.push(
+			"stack.pop();"
+		);
 	}
-	var _swap=function _swap() { /// swap ( a b -- b a ) // 20150405 sam
-		codegen.push("var n=stack.length-2, a=stack[n]; stack[n++]=stack[n], stack[n]=a;");
+	var _swap=function _swap() { /// swap ( a b -- b a )
+		// 20150405 sam
+		codegen.push(
+			"var n=stack.length-2, a=stack[n];"+
+			"stack[n++]=stack[n], stack[n]=a;"
+		);
 	}
-	var _rot=function _rot() { /// rot ( a b c-- b c a ) // 20150405 sam
-		codegen.push("var n=stack.length-3, a=stack[n]; stack[n++]=stack[n], stack[n++]=stack[n], stack[n]=a;");
+	var _rot=function _rot() { /// rot ( a b c-- b c a )
+		// 20150405 sam
+		codegen.push(
+			"var n=stack.length-3, a=stack[n];"+
+			"stack[n++]=stack[n], stack[n++]=stack[n], stack[n]=a;"
+		);
 	}
-	var _dashrot=function _dashrot() { /// -rot ( a b c-- c a b ) // 20150405 sam
-		codegen.push("var n=stack.length-1, c=stack[n]; stack[n--]=stack[n], stack[n--]=stack[n], stack[n]=c;");
+	var _dashrot=function _dashrot() { /// -rot ( a b c-- c a b )
+		// 20150405 sam
+		codegen.push(
+			"var n=stack.length-1, c=stack[n];"+
+			"stack[n--]=stack[n], stack[n--]=stack[n], stack[n]=c;"
+		);
 	}
 	var _multiply=function _multiply() { /// * ( a b -- a*b )
-		codegen.push("stack.push(stack.pop()*stack.pop());");
+		codegen.push(
+			"stack.push(stack.pop()*stack.pop());"
+		);
 	}
 	var _plus=function _plus() { /// + ( a b -- a+b )
-		codegen.push("var tos=stack.pop();stack.push(stack.pop()+tos);");
+		codegen.push(
+			"var tos=stack.pop();"+
+			"stack.push(stack.pop()+tos);"
+		);
 	}
 	var _dot=function _dot() { /// . ( n -- )
-		codegen.push("_out+=' '+stack.pop();");
+		codegen.push(
+			"_out+=' '+stack.pop();"
+		);
 	}
-	var _dotr=function _dotr() { /// .r ( n m -- ) /// print n right-justified with m-digits
-		codegen.push("var m=stack.pop(),n=stack.pop().toString();while(n.length<m)n=' '+n;_out+=n;");
+	var _dotr=function _dotr() { /// .r ( n m -- )
+		// print n right-justified with m-digits
+		codegen.push(
+			"var m=stack.pop(),n=stack.pop().toString();"+
+			"while(n.length<m)n=' '+n;_out+=n;"
+		);
 	}
 	var _cr=function _cr() { /// . ( -- )
-		codegen.push("_out+='\\n';");
+		codegen.push(
+			"_out+='\\n';"
+		);
 	}
 	var _minus=function _minus() { /// - ( a b -- a-b )
-		codegen.push("var tos=stack.pop();stack.push(stack.pop()-tos);");
+		codegen.push(
+			"var tos=stack.pop();"+
+			"stack.push(stack.pop()-tos);"
+		);
 	}
 	var rDepth=-1;
 	var _do=function _do() { /// do ( lmt bgn -- )
 		rDepth++;
 		codegen.push(
-			"var _B"+rDepth+"=stack.pop(),"+
-			    "_L"+rDepth+"=stack.pop(),"+
-			    "_R=_L"+rDepth+"-_B"+rDepth+",\n    "+
-				"_D"+rDepth+"=_R/Math.abs(_R);"+
-				"_L"+rDepth+"-=(1-_D"+rDepth+")/2;\n  "+
-			"for(var _i"+rDepth+"=_B"+rDepth+";"+
-				"(_L"+rDepth+"-_i"+rDepth+")*_D"+rDepth+">0;"+
-				"_i"+rDepth+"+=_D"+rDepth+"){");
+			"var _B"+rDepth+"=stack.pop(),"+ 					// bgn
+			    "_L"+rDepth+"=stack.pop(),"+ 					// lmt
+			    "_R=_L"+rDepth+"-_B"+rDepth+",\n    "+ 			// rng
+				"_D"+rDepth+"=_R/Math.abs(_R);"+ 				// dlt
+				"_L"+rDepth+"-=(1-_D"+rDepth+")/2;\n  "+ 		// lmt adjusted if lmt<bgn
+					
+			"for(var _i"+rDepth+"=_B"+rDepth+";"+ 				// set idx=bgn
+					
+				"(_L"+rDepth+"-_i"+rDepth+")*_D"+rDepth+">0;"+	// check if reach lmt
+					
+				"_i"+rDepth+"+=_D"+rDepth+"){");				// idx+=dlt
 	}
 	var _loop=function _loop() { /// loop ( -- )
-		codegen.push("}"),rDepth--;
+		codegen.push(
+			"}"
+		),rDepth--;
 	}
 	var _plusLoop=function _plusLoop() { /// +loop ( n -- )
-		codegen.push("_i"+rDepth+"+=stack.pop()-_D"+rDepth+";\n}"),rDepth--;
+		codegen.push(
+			"_i"+rDepth+"+=stack.pop()-_D"+rDepth+";\n}"
+		),rDepth--;
 	}
 	var	_i=function _i() { /// - ( -- i )
-		codegen.push("stack.push(_i"+rDepth+");");
+		codegen.push(
+			"stack.push(_i"+rDepth+");"
+		);
 	}
 	var	_j=function _j() { /// - ( -- i )
-		codegen.push("stack.push(_i"+(rDepth-1)+");");
+		codegen.push(
+			"stack.push(_i"+(rDepth-1)+");"
+		);
 	}
 	var _for=function _for() { /// for ( n -- )
 		rDepth++;
 		codegen.push(
 			"var _i"+rDepth+"=stack.pop()+1;"+
-			"while(--_i"+rDepth+">=0){");
+			"while(--_i"+rDepth+">=0){"
+		);
 	}
 	var _next=function _next() { /// next ( -- )
 		rDepth--;
-		codegen.push("}");
+		codegen.push(
+			"}"
+		);
 	}
 	var _oneplus=function _oneplus() { /// 1+ ( n -- n+1 )
-		codegen.push("stack[stack.length-1]++;");
+		codegen.push(
+			"stack[stack.length-1]++;"
+		);
 	}
 	var _if=function _if() { /// if ( flag -- )
-		codegen.push('if(stack.pop()){');
+		codegen.push(
+			'if(stack.pop()){'
+		);
 	}
 	var _else=function _else() { /// else ( -- )
-		codegen.push('}else{');
+		codegen.push(
+			'}else{'
+		);
 	}
 	var _then=function _then() { /// then ( -- )
-		codegen.push('}');
+		codegen.push(
+			'}'
+		);
 	}
 	var _words=function _words() {
 		var w=Object.keys(words), nw=w.length, x=Object.keys(defined), nx=x.length;
 		var t=JSON.stringify(nw+' primitives\n'+w.join(' ')+'\n'+nx+' extra defined'+(nx?'\n'+x.join(' '):''));
-		codegen.push('_out+='+t+';');
+		codegen.push(
+			'_out+='+t+';'
+		);
 	}
 	//////////////////////////////////////////////////////////////////////////
 	/// constructing words for opCodes
@@ -122,42 +188,68 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	var _doLit=function _doLit(n,nextOpc) { /// doLit ( -- n )
 		n=JSON.stringify(n);
 		if(nextOpc){
-			if 	   (nextOpc==_dup		)
-				iOpCode++,codegen.push("stack.push("+n+");"), codegen.push("stack.push("+n+");");
-			else	if (nextOpc==_plus		)
-				iOpCode++,codegen.push("stack[stack.length-1]+="+n+";");
-			else	if (nextOpc==_minus	)
-				iOpCode++,codegen.push("stack[stack.length-1]-="+n+";");
+			if 	   (nextOpc==_dup)
+				iOpCode++,codegen.push(
+					"stack.push("+n+");"
+				), codegen.push(
+					"stack.push("+n+");"
+				);
+			else	if (nextOpc==_plus)
+				iOpCode++,codegen.push(
+					"stack[stack.length-1]+="+n+";"
+				);
+			else	if (nextOpc==_minus)
+				iOpCode++,codegen.push(
+					"stack[stack.length-1]-="+n+";"
+				);
 			else	if (nextOpc==_multiply	)
-				iOpCode++,codegen.push("stack[stack.length-1]*="+n+";");
+				iOpCode++,codegen.push(
+					"stack[stack.length-1]*="+n+";"
+				);
 			else
-				codegen.push("stack.push("+n+");"); /// no extra advance
+				codegen.push(
+					"stack.push("+n+");"
+				); /// no extra advance
 		} else
-				codegen.push("stack.push("+n+");"); /// no extra advance
+				codegen.push(
+					"stack.push("+n+");"
+				); /// no extra advance
 	}
 	var _setValue=function _setValu(name) { /// setVal('v') ( n -- )
-		codegen.push("var "+name+"=stack.pop();")
+		codegen.push(
+			"var "+name+"=stack.pop();"
+		);
 		return 1;
 	}
 	var _putValue=function _putValu(name) { /// putVal('v') ( n -- )
-		codegen.push(name+"=stack.pop();")
+		codegen.push(
+			name+"=stack.pop();"
+		);
 		return 1;
 	}
 	var _getValue=function _getValue(name) { /// v ( -- n )
-		codegen.push("stack.push("+name+");");
+		codegen.push(
+			"stack.push("+name+");"
+		);
 		return 1;
 	}
 	var newName, xt; // globle variables
 	var _setColon=function _setColon(name){ /// : <name> ( -- )
-		codegen.push("var "+name+"=function(){");
+		codegen.push(
+			"var "+name+"=function(){"
+		);
 	}
 	var _endColon=function _endColon(){ /// ; ( -- )
-		codegen.push("}");
+		codegen.push(
+			"}"
+		);
 	}
 	var _runColon=function _runColon(name){ /// <name> ( ... )
-		codegen.push(name+"();");
+		codegen.push(
+			name+"();"
+		);
 	}
-	var	_backslash=function _backslash() { /// '(' ( -- )
+	var	_backslash=function _backslash() { /// '\' ( -- )
 		cmd+=' '+line.substr(iCol[iTok])
 		iTok=tokens.length;
 		showOpInfo('');
@@ -169,13 +261,19 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 		showOpInfo('');
 	}
 	var _setCode=function _runCode(code){ /// <name> ( ... )
-		codegen.push(code);
+		codegen.push(
+			code
+		);
 	}
 	var _runCode=function _runCode(name){ /// <name> ( ... )
-		codegen.push(name+"();");
+		codegen.push(
+			name+"();"
+		);
 	}
 	var _plustoValue=function _plustoValu(name) { /// plustoValue('v') ( n -- )
-		codegen.push(name+"+=stack.pop();")
+		codegen.push(
+			name+"+=stack.pop();"
+		);
 		return 1;
 	}
 	var _seeDefined=function _seeDefined(name) { /// _seeDefined(name) ( -- )
@@ -184,7 +282,9 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 			t=JSON.stringify(t.xt.toString());
 		else if(t=defined[name])
 			t=name;
-		codegen.push('_out+='+t+';');
+		codegen.push(
+			'_out+='+t+';'
+		);
 	}
 	//////////////////////////////////////////////////////////////////////////
 	/// defining words
