@@ -1,108 +1,106 @@
-	//////////////////////////////////////////////////////////////////////////
-	/// constructing words for opCodes
-	//////////////////////////////////////////////////////////////////////////
-	var core=require("./corewords");
-	var constructing={};
-	constructing._doLit=function _doLit(n,nextOpc) { /// doLit ( -- n )
-		n=JSON.stringify(n);
-		if(nextOpc){
-			if 	   (nextOpc==core._dup)
-				iOpCode++,codegen.push(
-					"stack.push("+n+");"
-				), codegen.push(
-					"stack.push("+n+");"
-				);
-			else	if (nextOpc==core._plus)
-				iOpCode++,codegen.push(
-					"stack[stack.length-1]+="+n+";"
-				);
-			else	if (nextOpc==core._minus)
-				iOpCode++,codegen.push(
-					"stack[stack.length-1]-="+n+";"
-				);
-			else	if (nextOpc==core._multiply	)
-				iOpCode++,codegen.push(
-					"stack[stack.length-1]*="+n+";"
-				);
-			else
-				codegen.push(
-					"stack.push("+n+");"
-				); /// no extra advance
-		} else
-				codegen.push(
-					"stack.push("+n+");"
-				); /// no extra advance
-	}
-	constructing._setValue=function _setValu(name) { /// setVal('v') ( n -- )
-		codegen.push(
-			"constructing._"+name+"=stack.pop();"
-		);
-		return 1;
-	}
-	constructing._putValue=function _putValu(name) { /// putVal('v') ( n -- )
-		codegen.push(
-			name+"=stack.pop();"
-		);
-		return 1;
-	}
-	constructing._getValue=function _getValue(name) { /// v ( -- n )
-		codegen.push(
-			"stack.push("+name+");"
-		);
-		return 1;
-	}
-	constructing._newName, xt; // globle variables
-	constructing._setColon=function _setColon(name){ /// : <name> ( -- )
-		codegen.push(
-			"constructing._"+name+"=function(){"
-		);
-	}
-	constructing._endColon=function _endColon(){ /// ; ( -- )
-		codegen.push(
-			"}"
-		);
-	}
-	constructing._runColon=function _runColon(name){ /// <name> ( ... )
-		codegen.push(
-			name+"();"
-		);
-	}
-	var	_backslash=function _backslash() { /// '\' ( -- )
-		cmd+=' '+line.substr(iCol[iTok])
-		iTok=tokens.length;
-		showOpInfo('');
-	}
-	var	_parenth=function _parenth() { /// '(' ( -- )
-		constructing._i=iCol[iTok];
-		while(iTok<tokens.length&&!tokens[iTok].match(/\)$/)) iTok++; iTok++;
-		cmd+=' '+line.substring(i,iCol[iTok]);
-		showOpInfo('');
-	}
-	constructing._setCode=function _runCode(code){ /// <name> ( ... )
-		codegen.push(
-			code
-		);
-	}
-	constructing._runCode=function _runCode(name){ /// <name> ( ... )
-		codegen.push(
-			name+"();"
-		);
-	}
-	constructing._plustoValue=function _plustoValu(name) { /// plustoValue('v') ( n -- )
-		codegen.push(
-			name+"+=stack.pop();"
-		);
-		return 1;
-	}
-	constructing._seeDefined=function _seeDefined(name) { /// _seeDefined(name) ( -- )
-		constructing._t=words[name];
-		if(t)
-			t=JSON.stringify(t.xt.toString());
-		else if(t=defined[name])
-			t=name;
-		codegen.push(
-			'_out+='+t+';'
-		);
-	}
-
+"use strict";
+var state=require('./state');
+var core=require("./corewords");
+//////////////////////////////////////////////////////////////////////////
+/// constructing words for opCodes
+//////////////////////////////////////////////////////////////////////////
+var constructing={};
+constructing._tst=function _tst(){
+	return words;
+}
+constructing._doLit=function _doLit(n,nextOpc) { /// doLit ( -- n )
+	n=JSON.stringify(n);
+	if(nextOpc){
+		var iOpCode=state.iOpCode;
+		if 	   (nextOpc==core._dup) // Peephole optimization 01 -- n dup
+			iOpCode++,state.codegen.push(
+				"stack.push("+n+");"
+			), state.codegen.push(
+				"stack.push("+n+");"
+			);
+		else	if (nextOpc==core._plus) // Peephole optimization 02 -- n +
+			iOpCode++,state.codegen.push(
+				"stack[stack.length-1]+="+n+";"
+			);
+		else	if (nextOpc==core._minus) // Peephole optimization 03 -- n -
+			iOpCode++,state.codegen.push(
+				"stack[stack.length-1]-="+n+";"
+			);
+		else	if (nextOpc==core._multiply) // Peephole optimization 04 -- n *
+			iOpCode++,state.codegen.push(
+				"stack[stack.length-1]*="+n+";"
+			);
+		else	if (nextOpc==core._div) // Peephole optimization 05 -- n /
+			iOpCode++,state.codegen.push(
+				"stack[stack.length-1]/="+n+";"
+			);
+		else
+			state.codegen.push(
+				"stack.push("+n+");"
+			); /// no extra advance
+		state.iOpCode=iOpCode;
+	} else
+		state.codegen.push(
+			"stack.push("+n+");"
+		); /// no extra advance
+}
+constructing._setValue=function _setValu(name) { /// setVal('v') ( n -- )
+	state.codegen.push(
+		"var "+name+"=stack.pop();"
+	);
+	return 1;
+}
+constructing._putValue=function _putValu(name) { /// putVal('v') ( n -- )
+	state.codegen.push(
+		name+"=stack.pop();"
+	);
+	return 1;
+}
+constructing._getValue=function _getValue(name) { /// v ( -- n )
+	state.codegen.push(
+		"stack.push("+name+");"
+	);
+	return 1;
+}
+constructing._setColon=function _setColon(name){ /// : <name> ( -- )
+	state.codegen.push(
+		"var "+name+"=function(){"
+	);
+}
+constructing._endColon=function _endColon(){ /// ; ( -- )
+	state.codegen.push(
+		"}"
+	);
+}
+constructing._runColon=function _runColon(name){ /// <name> ( ... )
+	state.codegen.push(
+		name+"();"
+	);
+}
+constructing._setCode=function _runCode(code){ /// <name> ( ... )
+	state.codegen.push(
+		code
+	);
+}
+constructing._runCode=function _runCode(name){ /// <name> ( ... )
+	state.codegen.push(
+		name+"();"
+	);
+}
+constructing._plustoValue=function _plustoValu(name) { /// plustoValue('v') ( n -- )
+	state.codegen.push(
+		name+"+=stack.pop();"
+	);
+	return 1;
+}
+constructing._seeDefined=function _seeDefined(name) { /// _seeDefined(name) ( -- )
+	var t=words[name]; // predefined primitive words
+	if(t)
+		t=JSON.stringify(t.xt.toString());
+	else if(t=global.defined[name]) // extra defined words
+		t=name;
+	state.codegen.push(
+		'_out+='+t+';'
+	);
+}
 module.exports=constructing;

@@ -1,88 +1,109 @@
+"use strict";
+var state=require('./state');
+var core=require("./corewords");	/// forth core words
+var tools=require("./tools");	/// basic tools used in construnctiog
+var constructing=require("./constructing");	/// constructing words for opCodes
 //////////////////////////////////////////////////////////////////////////
 /// defining words
 //////////////////////////////////////////////////////////////////////////
 var defining={};
 var cmd, at;
 defining._value=function _value(){ /// value <newName> ( n -- )
-	newName=nextToken();
+	var newName=tools.nextToken();
 	if(newName) {
-		cmd+=' '+newName;
-		eval('xt=function(){_setValue("'+newName+'")}');
-		if(tracing) showOpInfo('_setValue("'+newName+'")');
-		opCodes.push( xt ); // we define newName to setValue
-		addMapping(cmd), jsline++;
-		eval('xt=function(){_getValue("'+newName+'")}');
-		defined[newName]=xt; // then use newName to getValue
+		state.cmd+=' '+newName;
+		eval('xt=function(){constructing._setValue("'+newName+'")}');
+		if(state.tracing) tools.showOpInfo('_setValue("'+newName+'")');
+		state.opCodes.push( xt ); // we define newName to setValue
+		tools.addMapping(cmd), state.jsline++;
+		eval('xt=function(){constructing._getValue("'+newName+'")}');
+		global.defined[newName]=xt; // then use newName to getValue
 	//	console.log('defined['+newName+']:'+xt)
 	} else
 		throw 'need newName for "value" at line '+iLin+' column '+iCol[iTok];
 }
 defining._to=function _to(){ /// to <valueName> ( n -- )
-	var valueName=nextToken();
-	eval('xt=function(){_putValue("'+valueName+'")}');
-	if(tracing) showOpInfo('_putValue("'+valueName+'")');
-	opCodes.push( xt ); // we use valueName to putValue
-	addMapping('to '+valueName), jsline++;
+	var valueName=tools.nextToken();
+	eval('xt=function(){constructing._putValue("'+valueName+'")}');
+	if(state.tracing) tools.showOpInfo('constructing._putValue("'+valueName+'")');
+	state.opCodes.push( xt ); // we use valueName to putValue
+	tools.addMapping('to '+valueName), state.jsline++;
 }
+var xt;
 defining._colon=function _colon(){ /// : <name> ( -- )
-	newName=nextToken();
+	var newName=state.newName=tools.nextToken();
 	if(newName) {
-		cmd+=' '+newName;
-		eval('xt=function(){_setColon("'+newName+'")}');
-		if(tracing) showOpInfo('_setColon("'+newName+'")');
-		opCodes.push( xt ); // setColon to begin colon defintion
-		addMapping(cmd), jsline++;
+		var cmd=state.cmd+=' '+newName; 
+		eval('xt=function(){constructing._setColon("'+newName+'")}');
+		if(state.tracing)
+			tools.showOpInfo('constructing._setColon("'+newName+'")');
+		state.opCodes.push( xt ); // setColon to begin colon defintion
+		tools.addMapping(cmd), state.jsline++;
 	} else
 		throw 'need newName for ":" at line '+iLin+' column '+iCol[iTok];
 }
 defining._semicolon=function _semicolon(){ /// ; ( -- )
-	eval('xt=function(){_endColon()}');
-	if(tracing) showOpInfo('_endColon()');
-	opCodes.push( xt ); // endColon to end colon defintion
-	addMapping(token), jsline++;
-	eval('newXt=function(){_runColon("'+newName+'")}');
-	defined[newName]=newXt; // then use newName to runColon
+	var xt;
+	eval('xt=function(){constructing._endColon()}');
+	if(state.tracing) tools.showOpInfo('constructing._endColon()');
+	state.opCodes.push( xt ); // endColon to end colon defintion
+	tools.addMapping(state.cmd), state.jsline++;
+	var newXt;
+	eval('newXt=function(){constructing._runColon("'+state.newName+'")}');
+	global.defined[state.newName]=newXt; // then use newName to runColon
 }
 defining._code=function _code() { /// code <name> <function> end-code ( -- )
-	var newName=nextToken(), _j, _k, _f;
-	if(_j<0)
-		throw 'to code "'+_newName+'" need end-code at line '+iLin+' column '+iCol[iTok];
-	defining._k=iCol[iTok];
-	cmd+=' '+newName+' ', _f='';
+	var newName=tools.nextToken(), iLin=state.iLin, lines=state.lines, line=lines[iLin], _k=state.iCol[state.iTok];
+	var _j, _f, newXt;
+	if(!newName)
+		throw 'missing code name at line '+state.iLin+' column '+_k;
+	state.cmd+=' '+newName+' ', _f='';
 	while((_j=line.indexOf('end-code'))<0){
-		_f+=line.substring(k)+'\n',_k=0;
+		_f+=line.substring(_k)+'\n',_k=0;
 		if(++iLin<lines.length)line=lines[iLin];
 	};
 	if(_j<0)
 		throw "\"code "+newName+"\" needs \"end-code\" to close at line "+iLin+" column "+line.length;
+	if(!_k) state.line=line, state.iLin=iLin;
 	_f+=line.substring(_k,_j);
 	cmd+=_f+line.substr(_j,8);
-	_f='_setCode("var '+newName+'=function '+newName+'(){'+_f.trim()+'}")';
-	showOpInfo(_f);
+	_f='constructing._setCode("var '+newName+'=function '+newName+'(){'+_f.trim()+'}")';
+	tools.showOpInfo(_f);
 	eval('newXt=function(){'+_f+'}');
-	opCodes.push( newXt ); // endColon to end colon defintion
-	addMapping(token), jsline++;
+	state.opCodes.push( newXt ); // to end colon defintion
+	tools.addMapping(cmd), state.jsline++;
 	if(!_k){
-		iCol=[],iTok=0;
-		iCol=line.replace(/\S+/g,function(tkn,col){iCol[iTok++]=col});
-		tokens=line.split(/\s+/);
+		state.line=line, state.iLin=iLin;
+		var iCol=[],iTok=0; line.replace(/\S+/g,function(tkn,col){iCol[iTok++]=col});
+		state.iCol=iCol, state.tokens=line.split(/\s+/);
 	}
-	iTok=tokens.indexOf('end-code')+1;
-	eval('newXt=function(){_runCode("'+newName+'")}');
-	defined[newName]=newXt; // then use newName to runCode
+	state.iTok=state.tokens.indexOf('end-code')+1;
+	eval('newXt=function(){constructing._runCode("'+newName+'")}');
+	global.defined[newName]=newXt; // then use newName to runCode
 }
 defining._plusto=function _plusto(){ /// +to <valueName> ( n -- )
-	var valueName=nextToken();
-	eval('xt=function(){_plustoValue("'+valueName+'")}');
-	if(tracing) showOpInfo('_plustoValue("'+valueName+'")');
-	opCodes.push( xt ); // we use valueName to putValue
-	addMapping('+to '+valueName), jsline++;
+	var valueName=tools.nextToken(), xt;
+	eval('xt=function(){constructing._plustoValue("'+valueName+'")}');
+	if(state.tracing) tools.showOpInfo('constructing._plustoValue("'+valueName+'")');
+	state.opCodes.push( xt ); // we use valueName to putValue
+	tools.addMapping('+to '+valueName), state.jsline++;
 }
 defining._see=function _see(){ /// see <valueName> ( -- )
-	var name=nextToken(), str='_seeDefined("'+name+'")';
+	var name=tools.nextToken(), xt, str='constructing._seeDefined("'+name+'")';
 	eval('xt=function(){'+str+'}');
-	if(tracing) showOpInfo(str);
-	opCodes.push( xt );
-	addMapping('see '+name), jsline++;
+	if(state.tracing) tools.showOpInfo(str);
+	state.opCodes.push( xt );
+	tools.addMapping('see '+name), state.jsline++;
+}
+defining._backslash=function _backslash() { /// '\' ( -- )
+	state.cmd+=' '+state.lines[state.iLin].substr(state.iCol[state.iTok])
+	state.iTok=state.tokens.length;
+	tools.showOpInfo('');
+}
+defining._parenth=function _parenth() { /// '(' ( -- )
+	var _i=state.iCol[state.iTok];
+	while(state.iTok<state.tokens.length&&!state.tokens[state.iTok].match(/\)$/)) state.iTok++; state.iTok++;
+	state.cmd+=' '+state.lines[state.iLin].substring(_i,state.iCol[state.iTok]);
+	tools.showOpInfo('');
 }
 module.exports=defining;

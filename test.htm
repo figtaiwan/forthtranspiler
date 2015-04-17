@@ -2,14 +2,12 @@
 <!-- saved from url=(0045)file:///C:/ksana2015/forthtranspiler/test.htm -->
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="stylesheet" type="text/css" href="test.css">
-<script src="src/runtime.js"></script>
-<script src="src/transpile.js"></script>
+<script src="bundle.js"></script>
 <script src="jefvm.v3.js"></script>
 <script src="jefvm.v3_ext.js"></script>
 <script>
 function init(){
-	window.transpile=Transpile.transpile, window.trace=Transpile.trace, msgJs.innerText='';
-	eval(tool.value);
+	msgJs.innerText=''; window.transpile=Transpile.transpile, window.trace=Transpile.trace;
 }
 function clicked(){
 	btnRunJs.style.color='black';
@@ -49,13 +47,27 @@ window.js2=function(leftCode,i){
   var t=new Date().getTime()-t0;
   msgJs.innerText+='\nrun code '+i+' "'+leftCode+'" by js2 needs '+t+' ms';
 }</textarea><br>
+<script>
+var click1=function(){ eval(tool.value);
+	jef(test1.value,1); }
+var click2=function(){ eval(tool.value);
+	jef(test2.value,2); }
+var click3=function(){ eval(tool.value);
+	trans(test3.value,3); }
+var click4=function(){ eval(tool.value);
+	trans(test4.value,4); }
+var click5=function(){ eval(tool.value);
+	js1(test5.value,5); }
+var click6=function(){ eval(tool.value);
+	js2(test6.value,6); }
+</script>
 <button id="btnRunJs" onclick="clicked()" style="color:red">click to test the following 6 codes (needs several minutes)</button><br>
-<span>1.</span><textarea id="test1">  0 4000000 for 1 + next .</textarea><button onclick="jef(test1.value,1)">run code 1 by jef</button><br>
-<span>2.</span><textarea id="test2">: x 4000000 for 1 + next . ; 0 x</textarea><button onclick="jef(test2.value,1)">run code 2 by jef</button><br>
-<span>3.</span><textarea id="test3">  0 4000000 for 1 + next .</textarea><button onclick="trans(test3.value,3)">run code 3 by trans</button><br>
-<span>4.</span><textarea id="test4">: x 4000000 for 1 + next . ; 0 x</textarea><button onclick="trans(test4.value,4)">run code 4 by trans</button><br>
-<span>5.</span><textarea id="test5">var _i=4000000,_n=0;while(_i-->=0){_n=_n+1};console.log(_n)</textarea><button onclick="js1(test5.value,5)">run code 5 by js1</button><br>
-<span>6.</span><textarea id="test6">var _i=4000000,_n=0;while(_i-->=0){_n=_n+1};console.log(_n)</textarea><button onclick="js2(test6.value,6)">run code 6 by js2</button>
+<span>1.</span><textarea id="test1">  0 4000000 for 1 + next .</textarea><button onclick="click1()">run code 1 by jef</button><br>
+<span>2.</span><textarea id="test2">: x 4000000 for 1 + next . ; 0 x</textarea><button onclick="click2()">run code 2 by jef</button><br>
+<span>3.</span><textarea id="test3">  0 4000000 for 1 + next .</textarea><button onclick="click3()">run code 3 by trans</button><br>
+<span>4.</span><textarea id="test4">: x 4000000 for 1 + next . ; 0 x</textarea><button onclick="click4()">run code 4 by trans</button><br>
+<span>5.</span><textarea id="test5">var _i=4000000,_n=0;while(_i-->=0){_n=_n+1};console.log(_n)</textarea><button onclick="click5()">run code 5 by js1</button><br>
+<span>6.</span><textarea id="test6">var _i=4000000,_n=0;while(_i-->=0){_n=_n+1};console.log(_n)</textarea><button onclick="click6()">run code 6 by js2</button>
 <pre id="msgJs">after clicking button, to wait until done needs several minutes
 run code 1 "  0 4000000 for 1 + next ." by jef needs 8234 ms
 run code 2 ": x 4000000 for 1 + next . ; 0 x" 2 by jef needs 4290 ms
