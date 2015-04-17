@@ -5,9 +5,7 @@ var core=require("./corewords");
 /// constructing words for opCodes
 //////////////////////////////////////////////////////////////////////////
 var constructing={};
-constructing._tst=function _tst(){
-	return words;
-}
+
 constructing._doLit=function _doLit(n,nextOpc) { /// doLit ( -- n )
 	n=JSON.stringify(n);
 	if(nextOpc){

@@ -230,13 +230,13 @@ describe(			"E.  for next"
 	it(				'E14.  words ok'
 	,function(){ assert.deepEqual(	////////////////////
 		transpile([	"words"
-		]).out,		"40 primitives\ndup drop swap rot -rot * + . .r cr - ; : value to do loop +loop i j ( \\ for next 1+ if else then code +to see words / begin ?dup while over 1- repeat tst\n0 extra defined"
+		]).out,		"39 primitives\ndup drop swap rot -rot * + . .r cr - ; : value to do loop +loop i j ( \\ for next 1+ if else then code +to see words / begin ?dup while over 1- repeat\n0 extra defined"
 	)})
 
 	it(				'E15.  words ok'
 	,function(){ assert.deepEqual(	////////////////////
 		transpile(	"1 value one\n: two 2 ;\nsee one cr see two cr\nwords"
-		 ).out,		"1\nfunction (){\nstack.push(2);\n}\n40 primitives\ndup drop swap rot -rot * + . .r cr - ; : value to do loop +loop i j ( \\ for next 1+ if else then code +to see words / begin ?dup while over 1- repeat tst\n2 extra defined\none two"
+		 ).out,		"1\nfunction (){\nstack.push(2);\n}\n39 primitives\ndup drop swap rot -rot * + . .r cr - ; : value to do loop +loop i j ( \\ for next 1+ if else then code +to see words / begin ?dup while over 1- repeat\n2 extra defined\none two"
 	)})
 
 	it(				'E16.  begin ?dup while over repeat ok'
