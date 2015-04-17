@@ -45,7 +45,6 @@ var words =
 , "over"	: {xt:    core._over	 ,defining:0} /// over			( a b -- a b a )
 , "1-"		: {xt:    core._oneminus ,defining:0} /// 1-			( n -- n-1 )
 , "repeat"	: {xt:    core._repeat	 ,defining:0} /// repeat		( -- )
-, "tst"		: {xt:constructing._tst	 ,defining:1} /// tst			( -- )
 }
 global.words=words;
 module.exports=words;
