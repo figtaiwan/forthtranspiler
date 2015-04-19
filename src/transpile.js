@@ -34,7 +34,7 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 			state.iCol=iCol;
 			state.iTok=iTok=0,state.tokens=line.trim().split(/\s+/),state.tracing=tracing;
 			while(tools.checkNextToken()!==undefined){
-				state.forthncol=iCol[iTok]+1;
+				state.forthncol=iCol[state.iTok]+1;
 				state.at='  at '+iCol[iTok];
 				state.cmd=token=tools.nextToken();
 				var xt=global.defined[token];
@@ -88,10 +88,10 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 
 	var opCodes=state.opCodes=forth2js(lines);
 	if(tracing>1){
-		console.log('opCodes:');
+		console.log('opCodes:'); var n=runtime.length+1;
 		opCodes.forEach(function(f,i){
-			var s=f.toString(), m=s.match(/function\s?(\S*\(\))\s*\{([^}]+)/);
-			console.log(i+' '+(m?m[1]==='()'?m[2]:m[1]:JSON.stringify(s)));
+			var s=f.toString(), m=s.match(/function\s?(\S*\(\))\s*\{([^}]+)/), n=i+runtime.length+1;
+			console.log((n<10?'0':'')+n+' '+(m?m[1]==='()'?m[2]:m[1]:JSON.stringify(s)));
 		})
 	}
 	var iOpCode=0;
@@ -123,11 +123,14 @@ Transpile.transpile=function(forth) {
 			line=chalk.bold.green(line);
 		console.log('trans <-- '+line);
 	});
-	var jsCode=transpilejs(forth,runtimecode,"test").jsCodes.join('\n');
-//	jsCode=pretty(jsCode);
+	var jsCodes=transpilejs(forth,runtimecode,"test").jsCodes
+	var jsCode=jsCodes.map(function(line,i){
+		return '/* '+sourcemap._names._array[i]+' */ '+line;
+	}).join('\n');
+	console.log(tools.pretty(jsCode));
 	var code =	"(function(){"			+"\n"
 			 +	runtimecode.join('\n')	+"\n"
-			 +	jsCode					+"\n"
+			 +	jsCodes.join('\n')		+"\n"
 			 +	"runtime.out=_out;"		+"\n"
 			 +	"return runtime;"		+"\n"
 			 +	"})()";

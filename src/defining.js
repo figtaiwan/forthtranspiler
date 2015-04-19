@@ -36,7 +36,7 @@ defining._colon=function _colon(){ /// : <name> ( -- )
 		var cmd=state.cmd+=' '+newName; 
 		eval('xt=function(){constructing._setColon("'+newName+'")}');
 		if(state.tracing)
-			tools.showOpInfo('constructing._setColon("'+newName+'")');
+			tools.showOpInfo('_setColon("'+newName+'")');
 		state.opCodes.push( xt ); // setColon to begin colon defintion
 		tools.addMapping(cmd), state.jsline++;
 	} else
@@ -45,7 +45,7 @@ defining._colon=function _colon(){ /// : <name> ( -- )
 defining._semicolon=function _semicolon(){ /// ; ( -- )
 	var xt;
 	eval('xt=function(){constructing._endColon()}');
-	if(state.tracing) tools.showOpInfo('constructing._endColon()');
+	if(state.tracing) tools.showOpInfo('_endColon()');
 	state.opCodes.push( xt ); // endColon to end colon defintion
 	tools.addMapping(state.cmd), state.jsline++;
 	var newXt;
@@ -84,14 +84,14 @@ defining._code=function _code() { /// code <name> <function> end-code ( -- )
 defining._plusto=function _plusto(){ /// +to <valueName> ( n -- )
 	var valueName=tools.nextToken(), xt;
 	eval('xt=function(){constructing._plustoValue("'+valueName+'")}');
-	if(state.tracing) tools.showOpInfo('constructing._plustoValue("'+valueName+'")');
+	if(state.tracing) tools.showOpInfo('_plustoValue("'+valueName+'")');
 	state.opCodes.push( xt ); // we use valueName to putValue
 	tools.addMapping('+to '+valueName), state.jsline++;
 }
 defining._see=function _see(){ /// see <valueName> ( -- )
-	var name=tools.nextToken(), xt, str='constructing._seeDefined("'+name+'")';
-	eval('xt=function(){'+str+'}');
+	var name=tools.nextToken(), xt, str='_seeDefined("'+name+'")';
 	if(state.tracing) tools.showOpInfo(str);
+	eval('xt=function(){constructing.'+str+'}');
 	state.opCodes.push( xt );
 	tools.addMapping('see '+name), state.jsline++;
 }

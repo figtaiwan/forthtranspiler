@@ -7,35 +7,37 @@ var core=require("./corewords");
 var constructing={};
 
 constructing._doLit=function _doLit(n,nextOpc) { /// doLit ( -- n )
+	var names=sourcemap._names._array;
 	n=JSON.stringify(n);
 	if(nextOpc){
 		var iOpCode=state.iOpCode;
-		if 	   (nextOpc==core._dup) // Peephole optimization 01 -- n dup
+		if 	   (nextOpc==core._dup){ 		// Peephole optimization 01 -- n dup
 			iOpCode++,state.codegen.push(
 				"stack.push("+n+");"
 			), state.codegen.push(
 				"stack.push("+n+");"
 			);
-		else	if (nextOpc==core._plus) // Peephole optimization 02 -- n +
-			iOpCode++,state.codegen.push(
+		}else	if (nextOpc==core._plus){ 	// Peephole optimization 02 -- n +
+			names[iOpCode]+=names.splice(++iOpCode,1)[0].substr(2),state.codegen.push(
 				"stack[stack.length-1]+="+n+";"
 			);
-		else	if (nextOpc==core._minus) // Peephole optimization 03 -- n -
-			iOpCode++,state.codegen.push(
+		}else	if (nextOpc==core._minus){ 	// Peephole optimization 03 -- n -
+			names[iOpCode]+=names.splice(++iOpCode,1)[0].substr(2),state.codegen.push(
 				"stack[stack.length-1]-="+n+";"
 			);
-		else	if (nextOpc==core._multiply) // Peephole optimization 04 -- n *
-			iOpCode++,state.codegen.push(
+		}else	if (nextOpc==core._multiply){// Peephole optimization 04 -- n *
+			names[iOpCode]+=names.splice(++iOpCode,1)[0].substr(2),state.codegen.push(
 				"stack[stack.length-1]*="+n+";"
 			);
-		else	if (nextOpc==core._div) // Peephole optimization 05 -- n /
-			iOpCode++,state.codegen.push(
+		}else	if (nextOpc==core._div){ 	// Peephole optimization 05 -- n /
+			names[iOpCode]+=names.splice(++iOpCode,1)[0].substr(2),state.codegen.push(
 				"stack[stack.length-1]/="+n+";"
 			);
-		else
+		}else{
 			state.codegen.push(
 				"stack.push("+n+");"
 			); /// no extra advance
+		}
 		state.iOpCode=iOpCode;
 	} else
 		state.codegen.push(
