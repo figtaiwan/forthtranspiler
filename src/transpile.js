@@ -116,6 +116,7 @@ return {jsCodes:state.codegen,sourcemap:state.sourcemap,opCodes:state.opCodes};
 var runtimecode=require("./runtime");
 var Transpile={};
 Transpile.transpile=function(forth) {
+	tools.newMapping();
 	if(typeof forth==='string')
 		forth=forth.split(/\r?\n/);
 	forth.forEach(function(line){
