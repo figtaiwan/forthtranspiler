@@ -46,5 +46,8 @@ var words =
 , "1-"		: {xt:    core._oneminus ,defining:0} /// 1-			( n -- n-1 )
 , "repeat"	: {xt:    core._repeat	 ,defining:0} /// repeat		( -- )
 }
-global.words=words;
+if(typeof window==='object')
+	window.words=words;
+else
+	global.words=words;
 module.exports=words;
