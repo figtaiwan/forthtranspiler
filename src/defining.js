@@ -17,7 +17,10 @@ defining._value=function _value(){ /// value <newName> ( n -- )
 		state.opCodes.push( xt ); // we define newName to setValue
 		tools.addMapping(state.cmd), state.jsline++;
 		eval('xt=function(){constructing._getValue("'+newName+'")}');
-		global.defined[newName]=xt; // then use newName to getValue
+		if(typeof window==='object')
+			window.defined[state.newName]=xt;
+		else
+			global.defined[state.newName]=xt; // then use newName to getValue
 	//	console.log('defined['+newName+']:'+xt)
 	} else
 		throw 'need newName for "value" at line '+iLin+' column '+iCol[iTok];
@@ -54,7 +57,10 @@ defining._semicolon=function _semicolon(){ /// ; ( -- )
 	tools.addMapping(state.cmd), state.jsline++;
 	var newXt;
 	eval('newXt=function(){constructing._runColon("'+state.newName+'")}');
-	global.defined[state.newName]=newXt; // then use newName to runColon
+	if(typeof window==='object')
+			window.defined[state.newName]=newXt;
+		else
+			global.defined[state.newName]=newXt; // then use newName to runColon
 }
 defining._code=function _code() { /// code <name> <function> end-code ( -- )
 	var newName=tools.nextToken(), iLin=state.iLin, lines=state.lines, line=lines[iLin], _k=state.iCol[state.iTok];
@@ -83,7 +89,10 @@ defining._code=function _code() { /// code <name> <function> end-code ( -- )
 	}
 	state.iTok=state.tokens.indexOf('end-code')+1;
 	eval('newXt=function(){constructing._runCode("'+newName+'")}');
-	global.defined[newName]=newXt; // then use newName to runCode
+	if(typeof window==='object')
+			window.defined[state.newName]=newXt;
+		else
+			global.defined[state.newName]=newXt; // then use newName to runCode
 }
 defining._plusto=function _plusto(){ /// +to <valueName> ( n -- )
 	var valueName=tools.nextToken(), xt;

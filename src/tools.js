@@ -71,9 +71,10 @@ tools.pretty=function(jsCode){				// jsCode is an array of strings
 	})
 	return jsCode;
 }
-if (typeof window!=="undefined") {
+if (typeof window==='object') {
 	tools.newMapping=function(){};
 	tools.addMapping=function(){};
+	window.tools=tools;
 } else {
 	var SourceMapGenerator=require("source-map").SourceMapGenerator;
 
@@ -96,7 +97,5 @@ if (typeof window!=="undefined") {
 		  name: (n<10?'0':'')+n+' '+name
 		});
 	}
-	
+	module.exports=tools;
 }
-global.tools=tools;
-module.exports=tools;

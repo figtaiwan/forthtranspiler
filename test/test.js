@@ -7,7 +7,7 @@ var transpile	=function(forthCode){
 	console.log('trans -->',result.out);
 	return result;
 }
-// Transpiler.trace(2);
+Transpiler.trace(2);
 // /*
 describe(			"A.  test literals"
 	,function(){		///////////////////

@@ -97,7 +97,7 @@ constructing._seeDefined=function _seeDefined(name) { /// _seeDefined(name) ( --
 	var t=words[name]; // predefined primitive words
 	if(t)
 		t=JSON.stringify(t.xt.toString());
-	else if(t=global.defined[name]) // extra defined words
+	else if(t=defined[name]) // extra defined words
 		t=name;
 	state.codegen.push(
 		'_out+='+t+';'
