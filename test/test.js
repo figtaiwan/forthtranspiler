@@ -1,8 +1,14 @@
 var assert		=require("assert");
-var Transpile	=require("../src/transpile.js");
-var transpile	=Transpile.transpile;
-//Transpile.trace(2);
-
+var Transpiler	=require('../src/transpile');
+var f2js		=Transpiler.transpile;
+var transpile	=function(forthCode){
+	var jsCode	=f2js(forthCode);
+	var result	=eval(jsCode);
+	console.log('trans -->',result.out);
+	return result;
+}
+// Transpiler.trace(2);
+// /*
 describe(			"A.  test literals"
 	,function(){		///////////////////
 
@@ -137,8 +143,8 @@ describe(			"D.  nested colon calls"
 
 	it(				"D3.  looping 40000000 times"
 	,function(){ assert.deepEqual(	////////////////////
-		transpile(	": x 40000000 0 do 1+ loop ;\n0 x ."
-		).out	  ,	" 40000000"
+		transpile(	": x 400000 0 do 1+ loop ;\n0 x ."
+		).out	  ,	" 400000"
 	)})
 
 });
@@ -221,19 +227,19 @@ describe(			"E.  for next"
 	it(				'E13.  see ok'
 	,function(){ assert.deepEqual(	////////////////////
 		transpile(	"see ."
-		).out,		'function _dot() { /// . ( n -- )\r\n\tstate.codegen.push(\r\n\t\t"_out+=\' \'+stack.pop();"\r\n\t);\r\n}'
+		).out,		'function _dot() { ///               . ( n -- )\r\n\tstate.codegen.push(\r\n\t\t"_out+=\' \'+stack.pop();"\r\n\t);\r\n}'
 	)})
 
 	it(				'E14.  words ok'
 	,function(){ assert.deepEqual(	////////////////////
 		transpile(	"words"
-		).out,		"39 primitives\ndup drop swap rot -rot * + . .r cr - ; : value to do loop +loop i j ( \\ for next 1+ if else then code +to see words / begin ?dup while over 1- repeat\n0 extra defined"
+		).out,		"39 primitives\n39 primitives\ndup drop swap rot -rot *               + . .r cr - ; : value to do loop +loop i j ( \\ for next 1+ if else then code +to see words /               begin ?dup while over 1- repeat\n0 extra defined"
 	)})
 
 	it(				'E15.  words ok'
 	,function(){ assert.deepEqual(	////////////////////
 		transpile(	"1 value one\n: two 2 ;\nsee one cr see two cr\nwords"
-		 ).out,		"1\nfunction (){\nstack.push(2);\n}\n39 primitives\ndup drop swap rot -rot * + . .r cr - ; : value to do loop +loop i j ( \\ for next 1+ if else then code +to see words / begin ?dup while over 1- repeat\n2 extra defined\none two"
+		 ).out,		"1\nfunction (){\nstack.push(2);\n}\n39 primitives\n39 primitives\ndup drop swap rot -rot *               + . .r cr - ; : value to do loop +loop i j ( \\ for next 1+ if else then code +to see words /               begin ?dup while over 1- repeat\n2 extra defined\none two"
 	)})
 
 	it(				'E16.  begin ?dup while over repeat ok'
@@ -243,3 +249,4 @@ describe(			"E.  for next"
 	)})
 
 });
+//*/

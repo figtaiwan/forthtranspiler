@@ -18,15 +18,15 @@ if (argv.length<3) {
 	return;
 }
 var inputfn=argv[2];
+console.log('inputfn',inputfn)
 var input=fs.readFileSync(inputfn,"utf8").replace(/\r\n/g,"\n").split("\n");
+var outputfn=argv[2].substr(0,argv[2].length-1)+"js";
+console.log('outputfn',outputfn)
 
 //forth runtime
 var runtime=fs.readFileSync("./src/runtime.js","utf8").replace(/\r\n/g,"\n").split("\n");
-var outputfn=argv[2].substr(0,argv[2].length-1)+"js";
-
 
 var transpile=require("./src/transpile");
-
 var generated=transpile(input,runtime,inputfn,outputfn);
 
 var output=runtime.join("\n")+"\n"+generated.codegen.join("\n")+"\n//# sourceMappingURL="+outputfn+".map";

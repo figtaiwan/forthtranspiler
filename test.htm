@@ -7,7 +7,15 @@
 <script src="jefvm.v3_ext.js"></script>
 <script>
 function init(){
-	msgJs.innerText=''; window.transpile=Transpile.transpile, window.trace=Transpile.trace;
+	msgJs.innerText='';
+	var f2js	=Transpile.transpile;
+	window.transpile=function(forthCode){
+		var jsCode	=f2js(forthCode);
+		var result	=eval(jsCode);
+		console.log('trans -->',result.out);
+		return result;
+	}
+	window.trace=Transpile.trace;
 }
 function clicked(){
 	btnRunJs.style.color='black';
