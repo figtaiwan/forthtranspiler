@@ -171,6 +171,11 @@ Transpile.runcode=function(jsCode) {
 Transpile.trace=function(flag){
 	tracing=flag;
 }
-if(typeof window==='undefined')var chalk=require('chalk');
+if(typeof window==='undefined'){
+	var chalk=require('chalk');
+	global.Transpile=Transpile;
+} else {
+	window.Transpile=Transpile;
+}
 module.exports=Transpile;
-global.Transpile=Transpile;
+
