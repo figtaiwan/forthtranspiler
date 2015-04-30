@@ -15,4 +15,5 @@ var state=	{inputfn:""
 			,jsline:0
 			,rDepth:-1
 			}
-module.exports=state;
+if(typeof module==='object')
+	module.exports=state;

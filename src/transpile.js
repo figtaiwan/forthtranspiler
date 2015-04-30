@@ -1,8 +1,10 @@
 "use strict";
-var state=require('./state'); /// all global variables used
-var words=require("./words"); /// name list of all primitive words
-var tools=require("./tools"); /// all tool function defined
-var constructing=require("./constructing");	/// constructing words for opCodes
+if(typeof module==='object'){
+	var state=require('./state'); /// all global variables used
+	var words=require("./words"); /// name list of all primitive words
+	var tools=require("./tools"); /// all tool function defined
+	var constructing=require("./constructing");	/// constructing words for opCodes
+}
 var tracing=state.tracing=0;
 
 var forth2op=function(lines){ /// transpile lines of forth codes, return lines of op codes
@@ -70,6 +72,24 @@ var forth2op=function(lines){ /// transpile lines of forth codes, return lines o
 	}
 	return state.opCodes;
 }
+var op2js=function(opCodes){
+	var iOpCode=0;
+	//////////////////////////////////////////////////////////////////////////
+	/// transpiling loop to generat jsCodes next
+	//////////////////////////////////////////////////////////////////////////
+	while(iOpCode<opCodes.length){
+		var opCode=opCodes[iOpCode];
+		if (typeof opCode=="function") {
+			opCode();
+		} else {
+			state.iOpCode=iOpCode;
+			constructing._doLit(opCode,opCodes[iOpCode+1]);
+			iOpCode=state.iOpCode;
+		}
+		iOpCode++;
+	}
+	return state.codegen;
+}
 var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	if(typeof(forthCodes)=='string') forthCodes=forthCodes.split(/\r?\n/);
 // forthCodes: forth source codes in lines (an array)
@@ -94,23 +114,8 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 			console.log((n<10?'0':'')+n+' '+(m?m[1]==='()'?m[2]:m[1]:JSON.stringify(s)));
 		})
 	}
-	var iOpCode=0;
-
-	//////////////////////////////////////////////////////////////////////////
-	/// transpiling loop to generat jsCodes next
-	//////////////////////////////////////////////////////////////////////////
-	while(iOpCode<opCodes.length){
-		var opCode=opCodes[iOpCode];
-		if (typeof opCode=="function") {
-			opCode();
-		} else {
-			state.iOpCode=iOpCode;
-			constructing._doLit(opCode,opCodes[iOpCode+1]);
-			iOpCode=state.iOpCode;
-		}
-		iOpCode++;
-	}
-return {jsCodes:state.codegen,sourcemap:state.sourcemap,opCodes:state.opCodes};
+	var jsCodes=op2js(opCodes);
+return {jsCodes:jsCodes,sourcemap:state.sourcemap,opCodes:state.opCodes};
 }
 
 var runtimecode=require("./runtime");
@@ -174,8 +179,9 @@ Transpile.trace=function(flag){
 if(typeof window==='undefined'){
 	var chalk=require('chalk');
 	global.Transpile=Transpile;
+	if(typeof module==='object')
+		module.exports=Transpile;
 } else {
 	window.Transpile=Transpile;
 }
-module.exports=Transpile;
 

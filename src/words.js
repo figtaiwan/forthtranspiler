@@ -1,7 +1,9 @@
 "use strict";
-var core=require("./corewords");	/// forth core words
-var constructing=require("./constructing");	/// constructing words
-var defining=require("./defining");	/// defining words
+if(typeof module==='object'){
+	var core=require("./corewords");	/// forth core words
+	var constructing=require("./constructing");	/// constructing words
+	var defining=require("./defining");	/// defining words
+}
 //////////////////////////////////////////////////////////////////////////
 /// name list
 //////////////////////////////////////////////////////////////////////////

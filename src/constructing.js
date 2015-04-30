@@ -1,6 +1,8 @@
 "use strict";
-var state=require('./state');
-var core=require("./corewords");
+if(typeof module==='object'){
+	var state=require('./state');
+	var core=require("./corewords");
+}
 //////////////////////////////////////////////////////////////////////////
 /// constructing words for opCodes
 //////////////////////////////////////////////////////////////////////////
@@ -103,4 +105,5 @@ constructing._seeDefined=function _seeDefined(name) { /// _seeDefined(name) ( --
 		'_out+='+t+';'
 	);
 }
-module.exports=constructing;
+if(typeof module==='object')
+	module.exports=constructing;

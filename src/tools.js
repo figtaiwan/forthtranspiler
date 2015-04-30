@@ -1,5 +1,6 @@
 "use strict";
-var state=require('./state');
+if(typeof module==='object')
+	var state=require('./state');
 //////////////////////////////////////////////////////////////////////////
 /// tools
 //////////////////////////////////////////////////////////////////////////
@@ -97,5 +98,6 @@ if (typeof window==='object') {
 		  name: (n<10?'0':'')+n+' '+name
 		});
 	}
-	module.exports=tools;
+	if(typeof module==='object')
+		module.exports=tools;
 }

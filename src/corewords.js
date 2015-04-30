@@ -1,5 +1,6 @@
 "use strict";
-var state=require('./state');
+if(typeof module==='object')
+	var state=require('./state');
 //////////////////////////////////////////////////////////////////////////
 /// forth core words
 //////////////////////////////////////////////////////////////////////////
@@ -182,4 +183,7 @@ core._repeat=function _repeat() { // repeat ( -- )
 		'}'
 	);
 }
-module.exports=core;
+if(typeof module==='object')
+	module.exports=core;
+else
+	window.code=core;

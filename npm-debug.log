@@ -14,18 +14,18 @@
 8 silly cache add   rawSpec: '.',
 8 silly cache add   spec: 'C:\\ksana2015\\forthtranspiler',
 8 silly cache add   type: 'directory' }
-9 verbose addLocalDirectory C:\Users\chen\AppData\Roaming\npm-cache\forthtranspiler\1.0.0\package.tgz not in flight; packing
-10 verbose tar pack [ 'C:\\Users\\chen\\AppData\\Roaming\\npm-cache\\forthtranspiler\\1.0.0\\package.tgz',
+9 verbose addLocalDirectory C:\Users\chen\AppData\Roaming\npm-cache\forthtranspiler\1.0.8\package.tgz not in flight; packing
+10 verbose tar pack [ 'C:\\Users\\chen\\AppData\\Roaming\\npm-cache\\forthtranspiler\\1.0.8\\package.tgz',
 10 verbose tar pack   'C:\\ksana2015\\forthtranspiler' ]
-11 verbose tarball C:\Users\chen\AppData\Roaming\npm-cache\forthtranspiler\1.0.0\package.tgz
+11 verbose tarball C:\Users\chen\AppData\Roaming\npm-cache\forthtranspiler\1.0.8\package.tgz
 12 verbose folder C:\ksana2015\forthtranspiler
-13 info prepublish forthtranspiler@1.0.0
-14 verbose addLocalTarball adding from inside cache C:\Users\chen\AppData\Roaming\npm-cache\forthtranspiler\1.0.0\package.tgz
-15 silly cache afterAdd forthtranspiler@1.0.0
-16 verbose afterAdd C:\Users\chen\AppData\Roaming\npm-cache\forthtranspiler\1.0.0\package\package.json not in flight; writing
-17 verbose afterAdd C:\Users\chen\AppData\Roaming\npm-cache\forthtranspiler\1.0.0\package\package.json written
+13 info prepublish forthtranspiler@1.0.8
+14 verbose addLocalTarball adding from inside cache C:\Users\chen\AppData\Roaming\npm-cache\forthtranspiler\1.0.8\package.tgz
+15 silly cache afterAdd forthtranspiler@1.0.8
+16 verbose afterAdd C:\Users\chen\AppData\Roaming\npm-cache\forthtranspiler\1.0.8\package\package.json not in flight; writing
+17 verbose afterAdd C:\Users\chen\AppData\Roaming\npm-cache\forthtranspiler\1.0.8\package\package.json written
 18 silly publish { name: 'forthtranspiler',
-18 silly publish   version: '1.0.0',
+18 silly publish   version: '1.0.8',
 18 silly publish   description: 'Forth to Javascript Transpiler',
 18 silly publish   main: 'index.js',
 18 silly publish   dependencies: { chalk: '^1.0.0', 'source-map': '*' },
@@ -41,58 +41,50 @@
 18 silly publish   homepage: 'https://github.com/ksanaforge/forthtranspiler',
 18 silly publish   readme: '# forthtranspiler\r\nForth to Javascript Transpiler\r\n\r\nconvert forth Source code to Javascript with source mapping and unit testing support\r\n\r\n    npm i -g browserify watchify \r\n    watchify index.js -v -o bundle.js\r\n    \r\n    npm i -g mocha\r\n\tmocha --watch',
 18 silly publish   readmeFilename: 'README.md',
-18 silly publish   gitHead: '503648505de72089b0186b6286cc9664fbedd8bd',
-18 silly publish   _id: 'forthtranspiler@1.0.0',
-18 silly publish   _shasum: '13f9d3eefc6e3c433958a20d588cd48b2bd455ac',
+18 silly publish   gitHead: '181a578603be8b5305e860496cc533b77330a9d3',
+18 silly publish   _id: 'forthtranspiler@1.0.8',
+18 silly publish   _shasum: 'cf7ccb1d6e98c0a036f25a8901fa31329969950b',
 18 silly publish   _from: '.' }
 19 silly mapToRegistry name forthtranspiler
 20 silly mapToRegistry using default registry
 21 silly mapToRegistry registry https://registry.npmjs.org/
 22 silly mapToRegistry uri https://registry.npmjs.org/forthtranspiler
 23 verbose publish registryBase https://registry.npmjs.org/
-24 silly publish uploading C:\Users\chen\AppData\Roaming\npm-cache\forthtranspiler\1.0.0\package.tgz
+24 silly publish uploading C:\Users\chen\AppData\Roaming\npm-cache\forthtranspiler\1.0.8\package.tgz
 25 verbose request uri https://registry.npmjs.org/forthtranspiler
 26 verbose request sending authorization for write operation
-27 info attempt registry request try #1 at 18:35:01
+27 info attempt registry request try #1 at 12:38:10
 28 verbose request using bearer token for auth
-29 verbose request id ae6797104885d746
+29 verbose request id 1115b2eee5783494
 30 http request PUT https://registry.npmjs.org/forthtranspiler
-31 http 403 https://registry.npmjs.org/forthtranspiler
-32 verbose headers { date: 'Thu, 23 Apr 2015 10:34:54 GMT',
-32 verbose headers   server: 'Apache',
-32 verbose headers   'content-type': 'application/json',
-32 verbose headers   'cache-control': 'max-age=60',
-32 verbose headers   'content-length': '95',
-32 verbose headers   'accept-ranges': 'bytes',
-32 verbose headers   via: '1.1 varnish',
-32 verbose headers   'x-served-by': 'cache-nrt6124-NRT',
-32 verbose headers   'x-cache': 'MISS',
-32 verbose headers   'x-cache-hits': '0',
-32 verbose headers   'x-timer': 'S1429785291.680065,VS0,VE3190',
-32 verbose headers   'keep-alive': 'timeout=10, max=50',
-32 verbose headers   connection: 'Keep-Alive' }
-33 verbose request invalidating C:\Users\chen\AppData\Roaming\npm-cache\registry.npmjs.org\forthtranspiler on PUT
-34 error publish Failed PUT 403
-35 verbose stack Error: "You cannot publish over the previously published version 1.0.0." : forthtranspiler
-35 verbose stack     at CachingRegistryClient.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:254:14)
-35 verbose stack     at Request._callback (C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:178:14)
-35 verbose stack     at Request.self.callback (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:344:22)
-35 verbose stack     at Request.emit (events.js:110:17)
-35 verbose stack     at Request.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:1239:14)
-35 verbose stack     at Request.emit (events.js:129:20)
-35 verbose stack     at IncomingMessage.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:1187:12)
-35 verbose stack     at IncomingMessage.emit (events.js:129:20)
-35 verbose stack     at _stream_readable.js:908:16
-35 verbose stack     at process._tickCallback (node.js:355:11)
-36 verbose statusCode 403
-37 verbose pkgid forthtranspiler
-38 verbose cwd C:\ksana2015\forthtranspiler
-39 error Windows_NT 6.3.9600
-40 error argv "C:\\Program Files\\nodejs\\\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "publish"
-41 error node v0.12.0
-42 error npm  v2.5.1
-43 error code E403
-44 error "You cannot publish over the previously published version 1.0.0." : forthtranspiler
-45 error If you need help, you may report this error at:
-45 error     <http://github.com/npm/npm/issues>
-46 verbose exit [ 1, true ]
+31 info retry will retry, error on last attempt: Error: connect ECONNREFUSED
+32 info attempt registry request try #2 at 12:38:21
+33 verbose request using bearer token for auth
+34 http request PUT https://registry.npmjs.org/forthtranspiler
+35 info retry will retry, error on last attempt: Error: connect ECONNREFUSED
+36 info attempt registry request try #3 at 12:39:22
+37 verbose request using bearer token for auth
+38 http request PUT https://registry.npmjs.org/forthtranspiler
+39 verbose request invalidating C:\Users\chen\AppData\Roaming\npm-cache\registry.npmjs.org\forthtranspiler on PUT
+40 error publish Failed PUT undefined
+41 verbose stack Error: connect ECONNREFUSED
+41 verbose stack     at exports._errnoException (util.js:746:11)
+41 verbose stack     at TCPConnectWrap.afterConnect [as oncomplete] (net.js:983:19)
+42 verbose cwd C:\ksana2015\forthtranspiler
+43 error Windows_NT 6.3.9600
+44 error argv "C:\\Program Files\\nodejs\\\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "publish"
+45 error node v0.12.0
+46 error npm  v2.5.1
+47 error code ECONNREFUSED
+48 error errno ECONNREFUSED
+49 error syscall connect
+50 error Error: connect ECONNREFUSED
+50 error     at exports._errnoException (util.js:746:11)
+50 error     at TCPConnectWrap.afterConnect [as oncomplete] (net.js:983:19)
+50 error  { [Error: connect ECONNREFUSED]
+50 error   code: 'ECONNREFUSED',
+50 error   errno: 'ECONNREFUSED',
+50 error   syscall: 'connect' }
+51 error If you are behind a proxy, please make sure that the
+51 error 'proxy' config is set properly.  See: 'npm help config'
+52 verbose exit [ 1, true ]

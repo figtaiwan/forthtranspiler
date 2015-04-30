@@ -1,0 +1,44 @@
+
+<!-- saved from url=(0045)file:///C:/ksana2015/forthtranspiler/test.htm -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="forthTranspiler.css">
+<script src="bundle.js"></script>
+<script>
+function init(){
+	msgJs.innerText='';
+	var f2js	=Transpile.transpile;
+	window.transpile=function(forthCode){
+		var jsCode	=f2js(forthCode);
+		var result	=eval(jsCode);
+		console.log('trans -->',result.out);
+		return result;
+	}
+	window.trace=Transpile.trace;
+}
+function clicked(){
+	btnRunJs.style.color='black';
+	var old=msgJs.style.color;
+	eval(tool.value);
+	msgJs.innerText="click to tranfile and run forth code"
+	msgJs.style.color='red';
+	setTimeout(function(){
+		trans(test3.value,3);
+		msgJs.style.color=old, btnRunJs.style.color='red'
+	},0);
+}
+</script>
+</head><body onload="init()">
+<textarea id="tool">
+window.trans=function(leftCode,i){
+  var t0=new Date().getTime(); transpile(leftCode.replace(/\r\n/g,'\n'));
+  var t=new Date().getTime()-t0;
+  msgJs.innerText+='\nrun code '+i+' "'+leftCode+'" by trans needs '+t+' ms';
+}</textarea><br>
+<script>
+var click3=function(){ eval(tool.value);
+	trans(test3.value,3); }
+</script>
+<textarea id="test3">: x 0 9 begin ?dup while swap over + swap 1- repeat . ; x</textarea><button onclick="click3()">run forth code by trans</button><br>
+<pre id="msgJs">after clicking button
+forth code will be transpiled to js code and runed</pre>
+</body></html>

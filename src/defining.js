@@ -1,8 +1,10 @@
 "use strict";
-var state=require('./state');
-var core=require("./corewords");	/// forth core words
-var tools=require("./tools");	/// basic tools used in construnctiog
-var constructing=require("./constructing");	/// constructing words for opCodes
+if(typeof module==='object'){
+	var state=require('./state');
+	var core=require("./corewords");	/// forth core words
+	var tools=require("./tools");	/// basic tools used in construnctiog
+	var constructing=require("./constructing");	/// constructing words for opCodes
+}
 //////////////////////////////////////////////////////////////////////////
 /// defining words
 //////////////////////////////////////////////////////////////////////////
@@ -131,4 +133,5 @@ defining._parenth=function _parenth() { /// '(' ( -- )
 	state.iTok+=str.substring(2,_i+1).split(/\s+/).length;
 	tools.showOpInfo('');
 }
-module.exports=defining;
+if(typeof module==='object')
+	module.exports=defining;
