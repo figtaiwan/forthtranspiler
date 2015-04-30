@@ -73,22 +73,24 @@ var forth2op=function(lines){ /// transpile lines of forth codes, return lines o
 	return state.opCodes;
 }
 var op2js=function(opCodes){
-	var iOpCode=0;
 	//////////////////////////////////////////////////////////////////////////
 	/// transpiling loop to generat jsCodes next
 	//////////////////////////////////////////////////////////////////////////
+	state.iOpCode=0;
 	while(iOpCode<opCodes.length){
 		var opCode=opCodes[iOpCode];
-		if (typeof opCode=="function") {
-			opCode();
-		} else {
-			state.iOpCode=iOpCode;
-			constructing._doLit(opCode,opCodes[iOpCode+1]);
-			iOpCode=state.iOpCode;
-		}
-		iOpCode++;
+		if (typeof opCode=="function") opCode();
+		else constructing._doLit(opCode,opCodes[state.iOpCode+1]);
+		state.iOpCode++;
 	}
 	return state.codegen;
+}
+var showOpCode=function(){
+	console.log('opCodes:'); var n=runtime.length+1;
+	opCodes.forEach(function(f,i){
+		var s=f.toString(), m=s.match(/function\s?(\S*\(\))\s*\{([^}]+)/), n=i+runtime.length+1;
+		console.log((n<10?'0':'')+n+' '+(m?m[1]==='()'?m[2]:m[1]:JSON.stringify(s)));
+	})
 }
 var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	if(typeof(forthCodes)=='string') forthCodes=forthCodes.split(/\r?\n/);
@@ -102,20 +104,13 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	var tokens=state.tokens=[], opCodes=state.opCodes=[], defined=global.defined={}, iCol=state.iCol=[];
 	state.iLin=0, state.iTok=0, state.iOpCode=0;
 	var line='', token, opCode;
-	state.jsline=runtime.length;     //generated javascript code line count, for source map
+	state.jsline=runtime.length;   //generated javascript code line count, for source map
 	var codegen=state.codegen=[];                //generated javsacript code
 	var forthnline=0,forthncol=0;  //line and col of forth source code
-
 	var opCodes=state.opCodes=forth2op(lines);
-	if(tracing>1){
-		console.log('opCodes:'); var n=runtime.length+1;
-		opCodes.forEach(function(f,i){
-			var s=f.toString(), m=s.match(/function\s?(\S*\(\))\s*\{([^}]+)/), n=i+runtime.length+1;
-			console.log((n<10?'0':'')+n+' '+(m?m[1]==='()'?m[2]:m[1]:JSON.stringify(s)));
-		})
-	}
+	if(state.tracing>1) showOpCode(opCodes);
 	var jsCodes=op2js(opCodes);
-return {jsCodes:jsCodes,sourcemap:state.sourcemap,opCodes:state.opCodes};
+	return {jsCodes:jsCodes,sourcemap:state.sourcemap,opCodes:opCodes};
 }
 
 var runtimecode=require("./runtime");

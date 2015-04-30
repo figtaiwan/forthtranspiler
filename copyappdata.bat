@@ -1,0 +1,1 @@
+copy/Y ..\f2js-cli\bin\index.js %appdata%\npm\node_modules\f2js-cli\bin
