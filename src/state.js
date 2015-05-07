@@ -15,5 +15,9 @@ var state=	{inputfn:""
 			,jsline:0
 			,rDepth:-1
 			}
-if(typeof module==='object')
-	module.exports=state;
+if(typeof module==='object'){
+	module.exports=state,
+	global.state=state;
+}else{
+	window.state=state;
+}

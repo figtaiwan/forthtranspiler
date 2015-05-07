@@ -5,31 +5,32 @@ if(typeof module==='object'){
 	var tools=require("./tools"); /// all tool function defined
 	var constructing=require("./constructing");	/// constructing words for opCodes
 }
-var tracing=state.tracing=0;
+state.tracing=0;
 
 var forth2op=function(lines){ /// transpile lines of forth codes, return lines of op codes
-	var opCodes=state.opCodes=[], defined=global.defined={}, iTok, iCol, line, token;
-	var tracing=state.tracing;
-	if(tracing) console.log('\ntranspiling:');
+	var opCodes=state.opCodes=[], defined=global.defined={}, iCol, iTok, line, token;
+	if(state.tracing) console.log('\ntranspiling:');
 	//////////////////////////////////////////////////////////////////////////
 	/// transpiling loop to generat opCodes first
 	//////////////////////////////////////////////////////////////////////////
 	for (var i=0;i<lines.length;i++) {
 		state.line=line=lines[i];	/// for each line of forth codes
+		if(line==='')continue;
 		state.forthnline=i+1; /// as sorcemap of forth line
-		if(tracing) console.log('\tline '+i+' '+JSON.stringify(line)); /// tracing info
-		iCol=[],iTok=0,line.replace(/\S+/g,function(tkn,j){iCol[iTok++]=j});//generate iCol for each token
+		if(state.tracing) console.log('\tline '+i+' '+JSON.stringify(line)); /// tracing info
+		iCol=[], iTok=0;
+		line.replace(/\S+/g,function(tkn,j){
+			iCol[iTok++]=j;
+		});//generate iCol for each token
 		state.iCol=iCol;
-		state.iTok=iTok=0,
-		state.tokens=line.trim().split(/\s+/),
-		state.tracing=tracing;
+		state.iTok=0, state.tokens=line.trim().split(/\s+/);
 		while(tools.checkNextToken()!==undefined){
 			state.forthncol=iCol[state.iTok]+1;
-			state.at='  at '+iCol[iTok];
+			state.at='  at '+iCol[state.iTok];
 			state.cmd=token=tools.nextToken();
 			var xt=global.defined[token];
-			if (xt) {
-				if(tracing)
+			if (xt) { //// 待查01 words 之外定義的 暫緩
+				if(state.tracing)
 					tools.showOpInfo(xt.toString().match(/\{(\S+)\}/)[1]);
 				state.opCodes.push(xt);
 				tools.addMapping(token), state.jsline++;
@@ -38,9 +39,9 @@ var forth2op=function(lines){ /// transpile lines of forth codes, return lines o
 				if (w) {
 					xt=w.xt;
 					if(w.defining)
-						xt(); // execute defining word directly
-					else {
-						if(tracing)
+						xt(); ////  待查02 defining words 問題大大
+					else { ///  一般 words
+						if(state.tracing)
 							tools.showOpInfo(xt.toString().match(/function\s+(\S+)\s+/)[1]);
 						state.opCodes.push(xt);
 						tools.addMapping(token), state.jsline++;	//assuming only generate one js source line
@@ -49,19 +50,19 @@ var forth2op=function(lines){ /// transpile lines of forth codes, return lines o
 					var n=(parseFloat(token));
 					if (isNaN(n)) {
 						var M=token.match(/^'(\S*)'$/);
-						if (M) {
+						if (M) { //  單引號不含空格的字串
 							var str=M[1];
-							if(tracing)
+							if(state.tracing)
 								tools.showOpInfo(JSON.stringify(str));
 							state.opCodes.push(str);
 							tools.addMapping(token), state.jsline++;
-						} else {
+						} else { 
 							var msg="unknown word:"+token+" at line "+state.forthnline+" col "+state.forthncol;
 							console.log(msg);
 							throw msg;
 						}
-					} else {
-						if(tracing)
+					} else { //  數字
+						if(state.tracing)
 							tools.showOpInfo(n)
 						state.opCodes.push(n);
 						tools.addMapping(token), state.jsline++;
@@ -77,15 +78,15 @@ var op2js=function(opCodes){
 	/// transpiling loop to generat jsCodes next
 	//////////////////////////////////////////////////////////////////////////
 	state.iOpCode=0;
-	while(iOpCode<opCodes.length){
-		var opCode=opCodes[iOpCode];
+	while(state.iOpCode<opCodes.length){
+		var opCode=opCodes[state.iOpCode]; 
 		if (typeof opCode=="function") opCode();
 		else constructing._doLit(opCode,opCodes[state.iOpCode+1]);
 		state.iOpCode++;
 	}
 	return state.codegen;
 }
-var showOpCode=function(){
+var showOpCode=function(opCodes, runtime){
 	console.log('opCodes:'); var n=runtime.length+1;
 	opCodes.forEach(function(f,i){
 		var s=f.toString(), m=s.match(/function\s?(\S*\(\))\s*\{([^}]+)/), n=i+runtime.length+1;
@@ -108,25 +109,28 @@ var transpilejs=function(forthCodes,runtime,inputfn,outputfn) {
 	var codegen=state.codegen=[];                //generated javsacript code
 	var forthnline=0,forthncol=0;  //line and col of forth source code
 	var opCodes=state.opCodes=forth2op(lines);
-	if(state.tracing>1) showOpCode(opCodes);
+	if(state.tracing>1) showOpCode(opCodes, runtime);
 	var jsCodes=op2js(opCodes);
 	return {jsCodes:jsCodes,sourcemap:state.sourcemap,opCodes:opCodes};
 }
 
 var runtimecode=require("./runtime");
 var Transpile={};
-Transpile.transpile=function(forth) {
-	if(typeof window==='undefined')tools.newMapping();
+Transpile.transpile=function(forth,inputfn,outputfn) {
+	if(typeof module==='object')tools.newMapping();
 	if(typeof forth==='string')
-		forth=forth.split(/\r?\n/);
+		forth=forth.trim().split(/\r?\n/);
 	forth.forEach(function(line){
 		if(typeof window==='undefined')
 			line=chalk.bold.green(line);
-		console.log('trans <-- '+line);
+		console.log('// trans <-- '+line);
 	});
-	var jsCodes=transpilejs(forth,runtimecode,"test").jsCodes
+	var test=transpilejs(forth,runtimecode,inputfn);
+	var jsCodes=test.jsCodes;
+	var sourcemap=test.sourcemap;
 	var jsCode=jsCodes.map(function(line,i){
-		return '/* '+sourcemap._names._array[i]+' */ '+line;
+		var x=typeof sourcemap==='object'?('/* '+sourcemap._names._array[i]+' */ '):'';
+		return x+line;
 	});
 	jsCode=tools.pretty(jsCode.join('\n'));
 	var code =	runtimecode.join('\n')	+"\n"
@@ -135,48 +139,16 @@ Transpile.transpile=function(forth) {
 			 +	"runtime.out=_out;"		+"\n"
 			 +	"return runtime;"		+"\n"
 			 +	"})(runtime)";
-	return code;
-}
-
-Transpile.runcode=function(jsCode) {
-	console.log(tools.pretty(jsCode));
-	if(tracing) console.log('jsCode:\n'+jsCode)
-	if(tracing>1) console.log('code:\n'+code)
-	try {
-		var res=eval(code);
-		if(tracing) console.log('\nresult stack: '+JSON.stringify(res.stack)+'\n');
-		if(res.out){
-			var T=res.out.split(/\r?\n/).filter(function(t){return t}).map(function(t){
-				var m,n; m=n=0;
-				t=t.replace(/\S+/g,function(tkn,col){
-					var x='';
-					if(col-m>=68)
-						x+='\n',m=n;
-					else
-						n=col;
-					return x+tkn
-				});
-				return t;
-			});
-			T=T.join('\n').split('\n').map(function(t){
-				if(typeof window==='undefined')t=chalk.bold.yellow(t);
-				return 'trans --> '+t
-			}).join('\n');
-			console.log(T);
-		}
-	}
-	catch(e) { console.log(e) }
-	return res;
+	if(state.tracing>1)console.log('\njsCodes:\n'+code)
+	return {js:code, sourcemap:sourcemap};
 }
 Transpile.trace=function(flag){
-	tracing=flag;
+	state.tracing=flag;
 }
-if(typeof window==='undefined'){
+if(typeof module==='object'){
 	var chalk=require('chalk');
+	module.exports=Transpile,
 	global.Transpile=Transpile;
-	if(typeof module==='object')
-		module.exports=Transpile;
 } else {
-	window.Transpile=Transpile;
+	window.Transpile=Transpile; // 
 }
-

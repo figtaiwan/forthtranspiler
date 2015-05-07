@@ -1,4 +1,1 @@
-1 2 3 dup * 
-dup .
-5 + 
-.
+1 2 3\ndup *\ndup .\n5 +\n.\n: x\n  0 9\n  begin\n    ?dup\n  while\n    swap over +\n    swap 1-\n  repeat\n  .\n;\nx\n

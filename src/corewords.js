@@ -183,7 +183,9 @@ core._repeat=function _repeat() { // repeat ( -- )
 		'}'
 	);
 }
-if(typeof module==='object')
-	module.exports=core;
-else
+if(typeof module==='object'){
+	module.exports=core,
+	global.code=core;
+}else{
 	window.code=core;
+}

@@ -1,1 +1,1 @@
-{"version":3,"sources":["sample.f"],"names":["dup","*",".","+"],"mappings":";;;;;;CAAMA;CAAIC;CACVD;CAAIE;;CACFC;CACFD","file":"sample.js"}
+{"version":3,"sources":["sample.f"],"names":["00 1","01 2","02 3","03 dup","04 *","05 dup","06 .","07 5","08 + +","10 : x","11 0","12 9","13 begin","14 ?dup","15 while","16 swap","17 over","18 +","19 swap","20 1-","21 repeat","22 .","23 ;","24 x"],"mappings":";;;CAAAA;CAAEC;CAAEC;CACJC;CAAIC;CACJC;CAAIC;CACJC;CAAEC;CACFC;CACAC;CACEC;CAAEC;CACFC;CACEC;CACFC;CACEC;CAAKC;CAAKC;CACVC;CAAKC;CACPC;CACAC;CACFC;CACAC","file":"js"}

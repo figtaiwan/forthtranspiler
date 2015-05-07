@@ -11,7 +11,7 @@ if(typeof module==='object'){
 var defining={};
 var cmd, at;
 defining._value=function _value(){ /// value <newName> ( n -- )
-	var newName=tools.nextToken();
+	var newName=tools.nextToken(), xt;
 	if(newName) {
 		state.cmd+=' '+newName;
 		eval('xt=function(){constructing._setValue("'+newName+'")}');
@@ -20,15 +20,15 @@ defining._value=function _value(){ /// value <newName> ( n -- )
 		tools.addMapping(state.cmd), state.jsline++;
 		eval('xt=function(){constructing._getValue("'+newName+'")}');
 		if(typeof window==='object')
-			window.defined[state.newName]=xt;
+			window.defined[newName]=xt;
 		else
-			global.defined[state.newName]=xt; // then use newName to getValue
+			global.defined[newName]=xt; // then use newName to getValue
 	//	console.log('defined['+newName+']:'+xt)
 	} else
 		throw 'need newName for "value" at line '+iLin+' column '+iCol[iTok];
 }
 defining._to=function _to(){ /// to <valueName> ( n -- )
-	var valueName=tools.nextToken();
+	var valueName=tools.nextToken(), xt;
 	if(valueName) {
 		state.cmd+=' '+valueName;
 		eval('xt=function(){constructing._putValue("'+valueName+'")}');
@@ -40,14 +40,14 @@ defining._to=function _to(){ /// to <valueName> ( n -- )
 }
 var xt;
 defining._colon=function _colon(){ /// : <name> ( -- )
-	var newName=state.newName=tools.nextToken();
+	var newName=state.newName=tools.nextToken(), xt;
 	if(newName) {
 		state.cmd+=' '+newName; 
 		eval('xt=function(){constructing._setColon("'+newName+'")}');
 		if(state.tracing)
 			tools.showOpInfo('_setColon("'+newName+'")');
 		state.opCodes.push( xt ); // setColon to begin colon defintion
-		tools.addMapping(state.cmd), state.jsline++;
+		tools.addMapping(state.cmd), state.jsline+=1;
 	} else
 		throw 'need newName for ":" at line '+iLin+' column '+iCol[iTok];
 }
@@ -118,20 +118,28 @@ defining._see=function _see(){ /// see <valueName> ( -- )
 	} else
 		throw 'need name for "see" at line '+iLin+' column '+iCol[iTok];
 }
-defining._backslash=function _backslash() { /// '\' ( -- )
-	var names=sourcemap._names._array;
-	names[names.length-1]+=' '+state.lines[state.forthnline-1].substr(state.iCol[state.iTok-1]);
+defining._backslash=function _backslash() { /// '\' ( -- )var names=sourcemap._names._array;
+	if(typeof state.sourcemap!=='undefined'){
+		var names=state.sourcemap._names._array;
+		names[names.length-1]+=' '+state.lines[state.forthnline-1].substr(state.iCol[state.iTok-1]);
+	}
 	state.iTok=state.tokens.length;
 	tools.showOpInfo('');
 }
 defining._parenth=function _parenth() { /// '(' ( -- )
-	var names=sourcemap._names._array;
 	var _i=state.iCol[state.iTok-1], str=state.lines[state.forthnline-1].substr(_i);
 	if((_i=str.indexOf(')'))<0)
 		throw 'need right parenthesis to match "(" at line '+iLin+' column '+iCol[iTok];
-	names[names.length-1]+=' '+str.substr(0,_i+1);
+	if(typeof state.sourcemap!=='undefined'){
+		var names=state.sourcemap._names._array;
+		names[names.length-1]+=' '+str.substr(0,_i+1);
+	}
 	state.iTok+=str.substring(2,_i+1).split(/\s+/).length;
 	tools.showOpInfo('');
 }
-if(typeof module==='object')
-	module.exports=defining;
+if(typeof module==='object'){
+	module.exports=defining,
+	global.defining=defining;
+}else{
+	window.defining=defining;
+}

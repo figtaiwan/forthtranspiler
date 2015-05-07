@@ -1,14 +1,24 @@
 var assert		=require("assert");
 var Transpiler	=require('../src/transpile');
 var f2js		=Transpiler.transpile;
+
 var transpile	=function(forthCode){
 	var jsCode	=f2js(forthCode);
 	var result	=eval(jsCode);
-	console.log('trans -->',result.out);
+//	console.log('trans -->',result.out);
 	return result;
 }
-Transpiler.trace(2);
-// /*
+
+Transpiler.trace(0);
+/*
+var describe= function (title, fn){
+	var suite = Suite.create(suites[0], title);
+	suite.file = file;
+	suites.unshift(suite);
+	fn.call(suite);
+	suites.shift();
+	return suite;
+}*/
 describe(			"A.  test literals"
 	,function(){		///////////////////
 
@@ -148,10 +158,10 @@ describe(			"D.  nested colon calls"
 	)})
 
 });
-
-describe(			"E.  for next"
+// */
+describe(			"E.  others"
 	,function(){		/////////////////////////
-
+// /*
 	it(				"E1.  for next ok"
 	,function(){ assert.deepEqual(	////////////////////
 		transpile(	"0 9 for i dup . + next ."
@@ -227,19 +237,19 @@ describe(			"E.  for next"
 	it(				'E13.  see ok'
 	,function(){ assert.deepEqual(	////////////////////
 		transpile(	"see ."
-		).out,		'function _dot() { ///               . ( n -- )\r\n\tstate.codegen.push(\r\n\t\t"_out+=\' \'+stack.pop();"\r\n\t);\r\n}'
+		).out,		'function _dot() { /// . ( n -- )\r\n\tstate.codegen.push(\r\n\t\t"_out+=\' \'+stack.pop();"\r\n\t);\r\n}'
 	)})
-
+//*/
 	it(				'E14.  words ok'
 	,function(){ assert.deepEqual(	////////////////////
 		transpile(	"words"
-		).out,		"39 primitives\n39 primitives\ndup drop swap rot -rot *               + . .r cr - ; : value to do loop +loop i j ( \\ for next 1+ if else then code +to see words /               begin ?dup while over 1- repeat\n0 extra defined"
+		).out,		"39 primitives\ndup drop swap rot -rot * + . .r cr - ; : value to do loop +loop i j ( \\ for next 1+ if else then code +to see words / begin ?dup while over 1- repeat\n0 extra defined"
 	)})
 
 	it(				'E15.  words ok'
 	,function(){ assert.deepEqual(	////////////////////
 		transpile(	"1 value one\n: two 2 ;\nsee one cr see two cr\nwords"
-		 ).out,		"1\nfunction (){\nstack.push(2);\n}\n39 primitives\n39 primitives\ndup drop swap rot -rot *               + . .r cr - ; : value to do loop +loop i j ( \\ for next 1+ if else then code +to see words /               begin ?dup while over 1- repeat\n2 extra defined\none two"
+		 ).out,		"1\nfunction (){\n/* 03   2       */   stack.push(2);\n/* 04   ;       */ }\n39 primitives\ndup drop swap rot -rot * + . .r cr - ; : value to do loop +loop i j ( \\ for next 1+ if else then code +to see words / begin ?dup while over 1- repeat\n2 extra defined\none two"
 	)})
 
 	it(				'E16.  begin ?dup while over repeat ok'

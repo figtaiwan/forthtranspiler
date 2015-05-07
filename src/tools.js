@@ -14,20 +14,20 @@ tools.checkNextToken=function(){
 	return token;
 }
 tools.nextToken=function(){
-	var tokens=state.tokens, iTok=state.iTok, iCol=state.iCol, j;
+	var tokens=state.tokens, iCol=state.iCol, j;
 	token=undefined;
-	if(iTok<tokens.length){
-		token=tokens[iTok];
-		if(state.tracing>1){
-			j=iCol[iTok];
-			console.log('\tcol '+(j<10?'0':'')+j+' token '+iTok+': '+JSON.stringify(token));
+	if(state.iTok<tokens.length){
+		token=tokens[state.iTok];
+		if(state.tracing>2){
+			j=iCol[state.iTok];
+			console.log('\tcol '+(j<10?'0':'')+j+' token '+state.iTok+': '+JSON.stringify(token));
 		}
-		state.iTok=iTok+1;
+		state.iTok++;
 	}
 	return token;
 }
 tools.showOpInfo=function(msg){
-	if(state.tracing) console.log('\t'+state.at+' '+JSON.stringify(state.cmd)+(msg?'\n\t\t\topCodes '+state.opCodes.length+': '+msg:''));
+	if(state.tracing) console.log('\t'+state.at+' '+JSON.stringify(state.cmd)+(msg!==''?'\n\t\t\topCodes '+state.opCodes.length+': '+msg:''));
 }
 var spaces=function(n){
 	var t=''; while(n--)t+=' ';
@@ -65,39 +65,42 @@ tools.pretty=function(jsCode){				// jsCode is an array of strings
 //	}).replace(/(\/\* \d\d )?(.+?)?( \*\/)?([^\r\n*/]+)/g,function(m,m1,m2,m3,m4){
 	})
 	jsCode=jsCode.join('\n');
-	jsCode=jsCode.replace(/((\/\* \d\d )(.+?)( \*\/))?([^\r\n*/]+)/g,function(m,m1,m2,m3,m4,m5){
+	jsCode=jsCode.replace(/((\/\* \d\d )(.+?)( \*\/))?([^\r\n*/]+.*)/g,function(m,m1,m2,m3,m4,m5){
 		if(!m1)
 			return spaces(M+9)+m5;
 		return m2+m3+spaces(M-m3.length)+m4+m5;
 	})
 	return jsCode;
 }
-if (typeof window==='object') {
-	tools.newMapping=function(){};
-	tools.addMapping=function(){};
-	window.tools=tools;
-} else {
+if(typeof module==='object') {
 	var SourceMapGenerator=require("source-map").SourceMapGenerator;
-
 	tools.newMapping=function() {
-		global.sourcemap=new SourceMapGenerator({file:state.outputfn||state.inputfn+"js"});
+		state.sourcemap=new SourceMapGenerator({file:state.outputfn||state.inputfn+"js"});
 	}
 	tools.addMapping=function(name) {
-		var n=sourcemap._names._array.length;
+		var n=state.sourcemap._names._array.length;
 	//	console.log('"'+name+'"','forthCodes line',state.forthnline,'column',state.forthncol,'==>','jsCodes line',state.jsline+1,'column 1');
-		sourcemap.addMapping({
+		console.log('original: L'+state.forthnline+' C'+state.forthncol+' generated: L'+state.jsline);
+		state.sourcemap.addMapping({
 		  generated: {
-		    line: state.jsline,
+		    line: state.jsline+2,
 		    column: 1
 		  },
 		  source: state.inputfn,
 		  original: {
 		    line: state.forthnline,
-		    column: state.forthncol
+		    column: state.forthncol-1
 		  },
 		  name: (n<10?'0':'')+n+' '+name
 		});
 	}
-	if(typeof module==='object')
-		module.exports=tools;
+} else {
+	tools.newMapping=function() {}
+	tools.addMapping=function(name) {}
+}
+if (typeof module==='object') {
+	module.exports=tools,
+	global.tools=tools;
+} else {
+	window.tools=tools;
 }

@@ -9,7 +9,7 @@ if(typeof module==='object'){
 var constructing={};
 
 constructing._doLit=function _doLit(n,nextOpc) { /// doLit ( -- n )
-	var names=sourcemap._names._array;
+	var names=typeof state.sourcemap==='object'?state.sourcemap._names._array:[];
 	n=JSON.stringify(n);
 	if(nextOpc){
 		var iOpCode=state.iOpCode;
@@ -20,19 +20,31 @@ constructing._doLit=function _doLit(n,nextOpc) { /// doLit ( -- n )
 				"stack.push("+n+");"
 			);
 		}else	if (nextOpc==core._plus){ 	// Peephole optimization 02 -- n +
-			names[iOpCode]+=names.splice(++iOpCode,1)[0].substr(2),state.codegen.push(
+			++iOpCode;
+			if(names.length)
+				names[iOpCode]+=names.splice(iOpCode,1)[0].substr(2);
+			state.codegen.push(
 				"stack[stack.length-1]+="+n+";"
 			);
 		}else	if (nextOpc==core._minus){ 	// Peephole optimization 03 -- n -
-			names[iOpCode]+=names.splice(++iOpCode,1)[0].substr(2),state.codegen.push(
+			++iOpCode;
+			if(names.length)
+				names[iOpCode]+=names.splice(iOpCode,1)[0].substr(2);
+			state.codegen.push(
 				"stack[stack.length-1]-="+n+";"
 			);
 		}else	if (nextOpc==core._multiply){// Peephole optimization 04 -- n *
-			names[iOpCode]+=names.splice(++iOpCode,1)[0].substr(2),state.codegen.push(
+			++iOpCode;
+			if(names.length)
+				names[iOpCode]+=names.splice(iOpCode,1)[0].substr(2);
+			state.codegen.push(
 				"stack[stack.length-1]*="+n+";"
 			);
 		}else	if (nextOpc==core._div){ 	// Peephole optimization 05 -- n /
-			names[iOpCode]+=names.splice(++iOpCode,1)[0].substr(2),state.codegen.push(
+			++iOpCode;
+			if(names.length)
+				names[iOpCode]+=names.splice(iOpCode,1)[0].substr(2);
+			state.codegen.push(
 				"stack[stack.length-1]/="+n+";"
 			);
 		}else{
@@ -105,5 +117,9 @@ constructing._seeDefined=function _seeDefined(name) { /// _seeDefined(name) ( --
 		'_out+='+t+';'
 	);
 }
-if(typeof module==='object')
-	module.exports=constructing;
+if(typeof module==='object'){
+	module.exports=constructing,
+	global.constructing=constructing;
+}else{
+	window.constructing=constructing;
+}
